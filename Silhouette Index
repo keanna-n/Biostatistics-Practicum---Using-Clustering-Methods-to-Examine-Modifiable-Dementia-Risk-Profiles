@@ -1,8 +1,18 @@
+library(factoextra)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(poLCA)
+library(fmsb)
+library(kableExtra)
+
+
 ### function to extract silhouette width
 sil_width <- function(clusters, dis_matrix) {
   mean(silhouette(clusters, dis_matrix)[, 3])  # Extract average silhouette width
 }
 
+set.seed(123)
 
 ################
 ## 3 clusters 
