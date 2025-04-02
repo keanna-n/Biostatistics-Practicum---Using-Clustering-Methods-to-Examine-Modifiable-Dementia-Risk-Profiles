@@ -1,0 +1,80 @@
+### NOTE: THIS IS NOT MY CODE BUT IS PROVIDED FOR REFERENCE - given by practicum lab member 
+
+# A function to compute cognition score based on responses to the cognitive engagement questionnaire
+# The Flordia Cognitve Activities Scale is a 25-item scale. Each item uses a 5-point Likert scale:
+  # Have not done this in the past year, Less than once a month, 1-4 times per month, 5 or more times per month, Every day.
+  # The code reports 3 scores:
+    # Full score: sum of all 25 items
+    # Higher cognition score (hc): sum of select items that had a high correlation to the full score
+    # Frequent activities score (fa): sum of select items that were found to be done more often than others
+# Input: a df consisting of all the relevant questionnaire variables
+# Output: a revised df that contains record_id and the three summary scores
+
+compute_cognition <- function(dat){
+  
+  cognition_dat_cols <- c("fcas_brain_games",
+                          "fcas_games",
+                          "fcas_crosswords",
+                          "fcas_tv_radio",
+                          "fcas_music",
+                          "fcas_gardening",
+                          "fcas_newspaper",
+                          "fcas_reading",
+                          "fcas_writing",
+                          "fcas_talking",
+                          "fcas_original_art",
+                          "fcas_art_kits",
+                          "fcas_big_home_repairs",
+                          "fcas_small_home_repairs",
+                          "fcas_new_meals",
+                          "fcas_old_meals",
+                          "fcas_discussions",
+                          "fcas_courses",
+                          "fcas_investments",
+                          "fcas_finances",
+                          "fcas_unfamiliar_place",
+                          "fcas_familiar_place",
+                          "fcas_social_clubs",
+                          "fcas_religious_services",
+                          "fcas_shopping")
+  
+  cognition_dat_hc_cols <- c("fcas_brain_games",
+                             "fcas_crosswords",
+                             "fcas_reading",
+                             "fcas_writing",
+                             "fcas_original_art",
+                             "fcas_art_kits",
+                             "fcas_new_meals",
+                             "fcas_old_meals",
+                             "fcas_unfamiliar_place",
+                             "fcas_religious_services")
+  
+  cognition_dat_fa_cols <- c("fcas_tv_radio",
+                             "fcas_music",
+                             "fcas_newspaper",
+                             "fcas_reading",
+                             "fcas_talking",
+                             "fcas_old_meals",
+                             "fcas_familiar_place",
+                             "fcas_shopping")
+  
+  cognition_dat <- dat %>% 
+  select(record_id, all_of(cognition_dat_cols)) %>% 
+  mutate_at(vars(-record_id), ~case_when(. == "Every day" ~ "4",
+                                         . == "5 or more times a month" ~ "3",
+                                         . == "1-4 times a month" ~ "2",
+                                         . == "Less than once a month" ~ "1",
+                                         . == "Have not done this in the past year" ~ "0",
+                                         TRUE ~ as.character(NA))) %>% 
+  mutate_at(vars(-record_id), as.numeric)
+  
+  # Full scale score
+cognition_scores <- cognition_dat %>% 
+  rowwise() %>% 
+  mutate(full_score = sum(c_across(all_of(cognition_dat_cols)), na.rm=T)) %>% 
+  mutate(higher_cognition_score = sum(c_across(all_of(cognition_dat_hc_cols)), na.rm=T)) %>% 
+  mutate(frequent_activities_score = sum(c_across(all_of(cognition_dat_fa_cols)), na.rm=T)) %>% 
+  select(record_id, full_score, higher_cognition_score, frequent_activities_score)
+
+return(cognition_scores)  
+}
