@@ -1,0 +1,306 @@
+## need to run bootstrap functions first 
+
+######### Quartiled LCA
+### quartiled_data 
+
+### 2 class
+nclass <- 2
+model.q2 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = quartiled_data, nclass = 2, 
+                 nrep = 30,graphs = F, verbose = F)
+lca.q2.P.boot <- parametric_bootstrap(quartiled_data[,-1],model.q2,nclass = 2, n_boot = 500)
+lca.q2.NP.boot <- nonparametric_bootstrap(quartiled_data[,-1],model.q2, nclass = 2, n_boot = 500)
+
+analyze_results(lca.q2.NP.boot)
+
+Gsq_dist <- sapply(lca.q2.P.boot, function(x) x$Gsq)
+hist(Gsq_dist, breaks = 30, main = "Parametric Bootstrap - Quartiled LCA (2 Classes)", xlab = "G² Statistic", col = "lightblue")
+abline(v = model.q2$Gsq, col = "red", lwd = 2)  # Observed G² line
+abline(v = quantile(Gsq_dist, probs = 0.95), col = "black", lwd =2)
+legend("topright", col = c("red","black"), legend = c("Model G²", "95% Percentile"), lwd = 2)
+
+### 3 class
+
+nclass <- 3
+model.q3 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = quartiled_data, nclass = nclass, 
+                 nrep = 30,graphs = F, verbose = F)
+
+lca.q3.P.boot <- parametric_bootstrap(quartiled_data[,-1],model.q3,nclass = nclass, n_boot = 500)
+lca.q3.NP.boot <- nonparametric_bootstrap(quartiled_data[,-1],model.q3, nclass = nclass, n_boot = 500)
+
+analyze_results(lca.q3.NP.boot)
+
+Gsq_dist <- sapply(lca.q3.P.boot, function(x) x$Gsq)
+hist(Gsq_dist, breaks = 30, main = "Parametric Bootstrap - Quartiled LCA (3 Classes)", xlab = "G² Statistic", col = "lightblue")
+abline(v = model.q3$Gsq, col = "red", lwd = 2)  # Observed G² line
+abline(v = quantile(Gsq_dist, probs = 0.95), col = "black",lwd = 2)
+legend("topleft", col = c("red","black"), legend = c("Model G²", "95% Percentile"),lwd = 2)
+
+### 4 class
+
+nclass <- 4
+model.q4 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = quartiled_data, nclass = nclass, 
+                 nrep = 30,graphs = F, verbose = F)
+lca.q4.P.boot <- parametric_bootstrap(quartiled_data[,-1],model.q4,nclass = nclass, n_boot = 500)
+lca.q4.NP.boot <- nonparametric_bootstrap(quartiled_data[,-1],model.q4, nclass = nclass, n_boot = 500)
+
+analyze_results(lca.q4.NP.boot)
+
+Gsq_dist <- sapply(lca.q4.P.boot, function(x) x$Gsq)
+hist(Gsq_dist, breaks = 30, main = " Parametric Bootstrap - Quartiled LCA (4 classes)", xlab = "G² Statistic", col = "lightblue")
+abline(v = model.q4$Gsq, col = "red", lwd = 2)  # Observed G² line
+abline(v = quantile(Gsq_dist, probs = 0.95), col = "black",lwd = 2)
+legend("topleft", col = c("red","black"), legend = c("Model G²", "95% Percentile"),lwd=2)
+
+### 5 class
+
+nclass <- 5
+model.q5 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = quartiled_data, nclass = nclass, 
+                 nrep = 30,graphs = F, verbose = F)
+
+lca.q5.P.boot <- parametric_bootstrap(quartiled_data[,-1],model.q5,nclass = nclass, n_boot = 500)
+lca.q5.NP.boot <- nonparametric_bootstrap(quartiled_data[,-1],model.q5, nclass = nclass, n_boot = 500)
+
+analyze_results(lca.q5.NP.boot)
+
+Gsq_dist <- sapply(lca.q5.P.boot, function(x) x$Gsq)
+hist(Gsq_dist, breaks = 30, main = "Parametric Bootstrap - Quartiled LCA (5 classes)", xlab = "G² Statistic", col = "lightblue")
+abline(v = model.q5$Gsq, col = "red", lwd = 2)  # Observed G² line
+abline(v = quantile(Gsq_dist, probs = 0.95), col = "black", lwd =2)
+legend("topleft", col = c("red","black"), legend = c("Model G²", "95% Percentile"),lwd =2)
+
+########## 3-level LCA
+####cat_data 3
+
+### 2 class
+
+nclass <- 2
+model.c3.2 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = cat_data3, nclass = 2, 
+                 nrep = 30,graphs = F, verbose = F)
+
+lca.c3.2.P.boot <- parametric_bootstrap(cat_data3[,-1],model.c3.2,nclass = 2, n_boot = 500)
+lca.c3.2.NP.boot <- nonparametric_bootstrap(cat_data3[,-1],model.c3.2, nclass = 2, n_boot = 500)
+
+analyze_results(lca.c3.2.NP.boot)
+
+Gsq_dist <- sapply(lca.c3.2.P.boot, function(x) x$Gsq)
+hist(Gsq_dist, breaks = 30, main = "Parametric Bootstrap - 3-Level LCA (2 Classes)", xlab = "G² Statistic", col = "lightblue")
+abline(v = model.c3.2$Gsq, col = "red", lwd = 2)  # Observed G² line
+abline(v = quantile(Gsq_dist, probs = 0.95), col = "black",lwd=2)
+legend("topright", col = c("red","black"), legend = c("Model G²", "95% Percentile"),lwd =2)
+
+
+### class 3
+
+
+nclass <- 3
+model.c3.3 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = cat_data3, nclass = nclass, 
+                 nrep = 30,graphs = F, verbose = F)
+
+lca.c3.3.P.boot <- parametric_bootstrap(cat_data3[,-1],model.c3.3,nclass = nclass, n_boot = 500)
+lca.c3.3.NP.boot <- nonparametric_bootstrap(cat_data3[,-1],model.c3.3, nclass = nclass, n_boot = 500)
+
+analyze_results(lca.c3.3.NP.boot)
+
+Gsq_dist <- sapply(lca.c3.3.P.boot, function(x) x$Gsq)
+hist(Gsq_dist, breaks = 30, main = "Parametric Bootstrap - 3-Level LCA (3 Classes)", xlab = "G² Statistic", col = "lightblue")
+abline(v = model.c3.3$Gsq, col = "red", lwd = 2)  # Observed G² line
+abline(v = quantile(Gsq_dist, probs = 0.95), col = "black",lwd =2)
+legend("topright", col = c("red","black"), legend = c("Model G²", "95% Percentile"),lwd = 2)
+
+
+### class 4
+
+nclass <- 4
+model.c3.4 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = cat_data3, nclass = nclass, 
+                 nrep = 30,graphs = F, verbose = F)
+
+lca.c3.4.P.boot <- parametric_bootstrap(cat_data3[,-1],model.c3.4,nclass = nclass, n_boot = 500)
+lca.c3.4.NP.boot <- nonparametric_bootstrap(cat_data3[,-1],model.c3.4, nclass = nclass, n_boot = 500)
+
+analyze_results(lca.c3.4.NP.boot)
+
+Gsq_dist <- sapply(lca.c3.4.P.boot, function(x) x$Gsq)
+hist(Gsq_dist, breaks = 30, main = "Parametric Bootstrap - 3-Level LCA (4 Classes)", xlab = "G² Statistic", col = "lightblue")
+abline(v = model.c3.4$Gsq, col = "red", lwd = 2)  # Observed G² line
+abline(v = quantile(Gsq_dist, probs = 0.95), col = "black", lwd =2)
+legend("topleft", col = c("red","black"), legend = c("Model G²", "95% Percentile"), lwd =2)
+
+
+### class 5
+
+nclass <- 5
+model.c3.5 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = cat_data3, nclass = nclass, 
+                 nrep = 30,graphs = F, verbose = F)
+
+lca.c3.5.P.boot <- parametric_bootstrap(cat_data3[,-1],model.c3.5,nclass = nclass, n_boot = 500)
+lca.c3.5.NP.boot <- nonparametric_bootstrap(cat_data3[,-1],model.c3.5, nclass = nclass, n_boot = 500)
+
+analyze_results(lca.c3.5.NP.boot)
+
+Gsq_dist <- sapply(lca.c3.5.P.boot, function(x) x$Gsq)
+hist(Gsq_dist, breaks = 30, main = "Parametric Bootstrap - 3-Level LCA (5 Classes)", xlab = "G² Statistic", col = "lightblue")
+abline(v = model.c3.5$Gsq, col = "red", lwd = 2)  # Observed G² line
+abline(v = quantile(Gsq_dist, probs = 0.95), col = "black", lwd = 2)
+legend("topleft", col = c("red","black"), legend = c("Model G²", "95% Percentile"), lwd =3)
+
+#############################
+######4-level
+## cat_data
+
+### 2 class
+
+
+nclass <- 2
+model.c4.2 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = cat_data, nclass = 2, 
+                 nrep = 30,graphs = F, verbose = F)
+
+lca.c4.2.P.boot <- parametric_bootstrap(cat_data[,-1],model.c4.2,nclass = 2, n_boot = 500)
+lca.c4.2.NP.boot <- nonparametric_bootstrap(cat_data[,-1],model.c4.2, nclass = 2, n_boot = 500)
+
+analyze_results(lca.c4.2.NP.boot)
+
+Gsq_dist <- sapply(lca.c4.2.P.boot, function(x) x$Gsq)
+hist(Gsq_dist, breaks = 30, main = "Parametric Bootstrap - 4-Level LCA (2 Classes)", xlab = "G² Statistic", col = "lightblue")
+abline(v = model.c4.2$Gsq, col = "red", lwd = 2)  # Observed G² line
+abline(v = quantile(Gsq_dist, probs = 0.95), col = "black", lwd =2)
+legend("topleft", col = c("red","black"), legend = c("Model G²", "95% Percentile"), lwd = 2)
+
+
+### class 3
+
+
+nclass <- 3
+model.c4.3 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = cat_data, nclass = nclass, 
+                 nrep = 30,graphs = F, verbose = F)
+
+lca.c4.3.P.boot <- parametric_bootstrap(cat_data[,-1],model.c4.3,nclass = nclass, n_boot = 500)
+lca.c4.3.NP.boot <- nonparametric_bootstrap(cat_data[,-1],model.c4.3, nclass = nclass, n_boot = 500)
+
+analyze_results(lca.c4.3.NP.boot)
+
+Gsq_dist <- sapply(lca.c4.3.P.boot, function(x) x$Gsq)
+hist(Gsq_dist, breaks = 30, main = "Parametric Bootstrap - 4-Level LCA (3 Classes)", xlab = "G² Statistic", col = "lightblue")
+abline(v = model.c4.3$Gsq, col = "red", lwd = 2)  # Observed G² line
+abline(v = quantile(Gsq_dist, probs = 0.95), col = "black", lwd = 2)
+legend("topleft", col = c("red","black"), legend = c("Model G²", "95% Percentile"), lwd = 2)
+
+
+### class 4
+
+nclass <- 4
+model.c4.4 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = cat_data3, nclass = nclass, 
+                 nrep = 30,graphs = F, verbose = F)
+
+lca.c4.4.P.boot <- parametric_bootstrap(cat_data3[,-1],model.c4.4,nclass = nclass, n_boot = 500)
+lca.c4.4.NP.boot <- nonparametric_bootstrap(cat_data3[,-1],model.c4.4, nclass = nclass, n_boot = 500)
+
+analyze_results(lca.c4.4.NP.boot)
+
+Gsq_dist <- sapply(lca.c4.4.P.boot, function(x) x$Gsq)
+hist(Gsq_dist, breaks = 30, main = "Parametric Bootstrap - 4-Level LCA (4 Classes)", xlab = "G² Statistic", col = "lightblue")
+abline(v = model.c4.4$Gsq, col = "red", lwd = 2)  # Observed G² line
+abline(v = quantile(Gsq_dist, probs = 0.95), col = "black", lwd = 2)
+legend("topright", col = c("red","black"), legend = c("Model G²", "95% Percentile"), lwd = 2)
+
+
+### class 5
+
+nclass <- 5
+model.c4.5 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = cat_data3, nclass = nclass, 
+                 nrep = 30,graphs = F, verbose = F)
+
+lca.c4.5.P.boot <- parametric_bootstrap(cat_data3[,-1],model.c4.5,nclass = nclass, n_boot = 500)
+lca.c4.5.NP.boot <- nonparametric_bootstrap(cat_data3[,-1],model.c4.5, nclass = nclass, n_boot = 500)
+
+analyze_results(lca.c4.5.NP.boot)
+
+Gsq_dist <- sapply(lca.c4.5.P.boot, function(x) x$Gsq)
+hist(Gsq_dist, breaks = 30, main = "Parametric Bootstrap - 4-Level LCA (5 Classes)", xlab = "G² Statistic", col = "lightblue")
+abline(v = model.c4.5$Gsq, col = "red", lwd = 2)  # Observed G² line
+abline(v = quantile(Gsq_dist, probs = 0.95), col = "black", lwd = 2)
+legend("topleft", col = c("red","black"), legend = c("Model G²", "95% Percentile"), lwd =2)
+
+
+
+#######################
+## create df
+
+
+#function to format mean and CI
+format_mean_ci <- function(mean, ci) {
+  paste0(round(mean, 2), " [", round(ci[1], 2), ", ", round(ci[2], 2), "]")
+}
+
+method <- c(rep("Quartiled LCA", 4), rep("3-Level LCA", 4), rep("4-Level LCA", 4))
+class_number <- rep(2:5, 3)
+
+entropy_values <- c(
+  format_mean_ci(analyze_results(lca.q2.NP.boot)$EN_alpha_mean,
+                 analyze_results(lca.q2.NP.boot)$EN_alpha_ci),
+  format_mean_ci(analyze_results(lca.q3.NP.boot)$EN_alpha_mean,
+                 analyze_results(lca.q3.NP.boot)$EN_alpha_ci),
+  format_mean_ci(analyze_results(lca.q4.NP.boot)$EN_alpha_mean,
+                 analyze_results(lca.q4.NP.boot)$EN_alpha_ci),
+  format_mean_ci(analyze_results(lca.q5.NP.boot)$EN_alpha_mean,
+                 analyze_results(lca.q5.NP.boot)$EN_alpha_ci),
+  
+  format_mean_ci(analyze_results(lca.c3.2.NP.boot)$EN_alpha_mean,
+                 analyze_results(lca.c3.2.NP.boot)$EN_alpha_ci),
+  format_mean_ci(analyze_results(lca.c3.3.NP.boot)$EN_alpha_mean,
+                 analyze_results(lca.c3.3.NP.boot)$EN_alpha_ci),
+  format_mean_ci(analyze_results(lca.c3.4.NP.boot)$EN_alpha_mean,
+                 analyze_results(lca.c3.4.NP.boot)$EN_alpha_ci),
+  format_mean_ci(analyze_results(lca.c3.5.NP.boot)$EN_alpha_mean,
+                 analyze_results(lca.c3.5.NP.boot)$EN_alpha_ci),
+
+  format_mean_ci(analyze_results(lca.c4.2.NP.boot)$EN_alpha_mean,
+                 analyze_results(lca.c4.2.NP.boot)$EN_alpha_ci),
+  format_mean_ci(analyze_results(lca.c4.3.NP.boot)$EN_alpha_mean,
+                 analyze_results(lca.c4.3.NP.boot)$EN_alpha_ci),
+  format_mean_ci(analyze_results(lca.c4.4.NP.boot)$EN_alpha_mean,
+                 analyze_results(lca.c4.4.NP.boot)$EN_alpha_ci),
+  format_mean_ci(analyze_results(lca.c4.5.NP.boot)$EN_alpha_mean,
+                 analyze_results(lca.c4.5.NP.boot)$EN_alpha_ci)
+)
+
+relative_entropy_values <- c(
+  format_mean_ci(analyze_results(lca.q2.NP.boot)$E_mean,
+                 analyze_results(lca.q2.NP.boot)$E_ci),
+  format_mean_ci(analyze_results(lca.q3.NP.boot)$E_mean,
+                 analyze_results(lca.q3.NP.boot)$E_ci),
+  format_mean_ci(analyze_results(lca.q4.NP.boot)$E_mean,
+                 analyze_results(lca.q4.NP.boot)$E_ci),
+  format_mean_ci(analyze_results(lca.q5.NP.boot)$E_mean,
+                 analyze_results(lca.q5.NP.boot)$E_ci),
+  
+  format_mean_ci(analyze_results(lca.c3.2.NP.boot)$E_mean,
+                 analyze_results(lca.c3.2.NP.boot)$E_ci),
+  format_mean_ci(analyze_results(lca.c3.3.NP.boot)$E_mean,
+                 analyze_results(lca.c3.3.NP.boot)$E_ci),
+  format_mean_ci(analyze_results(lca.c3.4.NP.boot)$E_mean,
+                 analyze_results(lca.c3.4.NP.boot)$E_ci),
+  format_mean_ci(analyze_results(lca.c3.5.NP.boot)$E_mean,
+                 analyze_results(lca.c3.5.NP.boot)$E_ci),
+
+  format_mean_ci(analyze_results(lca.c4.2.NP.boot)$E_mean,
+                 analyze_results(lca.c4.2.NP.boot)$E_ci),
+  format_mean_ci(analyze_results(lca.c4.3.NP.boot)$E_mean,
+                 analyze_results(lca.c4.3.NP.boot)$E_ci),
+  format_mean_ci(analyze_results(lca.c4.4.NP.boot)$E_mean,
+                 analyze_results(lca.c4.4.NP.boot)$E_ci),
+  format_mean_ci(analyze_results(lca.c4.5.NP.boot)$E_mean,
+                 analyze_results(lca.c4.5.NP.boot)$E_ci)
+
+)
+
+np.boot.results <- data.frame(
+  Method = method,
+  Class_Number = class_number,
+  Entropy = entropy_values,
+  Relative_Entropy = relative_entropy_values
+)
+
+colnames(np.boot.results) <- gsub("_", " ", colnames(np.boot.results))
+
+print(np.boot.results)
+
