@@ -1,3 +1,8 @@
+library(poLCA)
+library(boot)
+library(kableExtra)
+library(dplyr)
+
 ## need to run bootstrap functions first 
 
 ######### Quartiled LCA
