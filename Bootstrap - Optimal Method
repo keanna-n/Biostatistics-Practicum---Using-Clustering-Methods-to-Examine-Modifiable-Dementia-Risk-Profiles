@@ -1,0 +1,104 @@
+library(poLCA)
+library(cluster)
+library(dplyr)
+library(ggplot2)
+
+# Running Bootstrap for Variance
+
+n_boot <- 100
+boot_results <- list()
+avg_cluster_widths <- list()
+
+for (i in 1:n_boot){
+  boot_sample <- cat_data3[sample(nrow(cat_data3), replace = TRUE), ]
+  lca_result <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = cat_data3, nclass = 4,
+                 nrep = 20, graphs = F, verbose = F)
+  dis_matrix <- daisy(cat_data3, metric = "gower")
+  silhouette_score <- silhouette(lca_result$predclass, dis_matrix)
+  boot_results[[i]] <- silhouette_score[,3]
+  avg_cluster_widths[[i]] <- summary(silhouette_score)$clus.avg.widths
+
+}
+
+## Calculating Mean and Variance of Scores for Each Person
+
+
+mean.score <- list()
+var <- list()
+ci_lower <- list()
+ci_upper <- list()
+for(i in 1:nrow(cat_data3)){
+  score <- matrix(NA, nrow = 1, ncol = length(boot_results))
+  for (j in 1:length(boot_results)){
+    score[,j] <- boot_results[[j]][i]
+  }
+  mean.score[i] <- mean(score)
+  var[i] <- sd(score)
+  ci_lower[i] <- quantile(score, probs = 0.025)
+  ci_upper[i] <- quantile(score, probs = 0.975)
+}
+
+agg.per.person <- data.frame("Mean" = unlist(mean.score),
+                          "Variance" = unlist(var),
+                          "Lower CI" = unlist(ci_lower),
+                          "Upper CI" = unlist(ci_upper))
+
+hist(agg.per.person$Variance, main = "Variance of Silhouette Score Per Person", xlab = "Variance", 
+     col = "lightgreen")
+
+boot_results.df <- as.data.frame.list(boot_results)
+#each row is the score for each person 
+colnames(boot_results.df) <- c(1:100)
+
+
+## Avg Cluster Widths
+
+
+avg_cluster_widths_df <- as.data.frame.list(avg_cluster_widths)
+colnames(avg_cluster_widths_df) <- c(1:100)
+
+mean_avgwidth <- rowMeans(avg_cluster_widths_df)
+var_avgwidth <- apply(avg_cluster_widths_df,1,sd)
+ci_lower <- apply(avg_cluster_widths_df, 1, function(x) quantile(x, probs = 0.025))
+ci_upper <- apply(avg_cluster_widths_df, 1, function(x) quantile(x, probs = 0.975))
+
+summary.avgwidth <- data.frame("Cluster" = c(1,2,3,4),
+                               "Mean" = mean_avgwidth,
+                               "Variance" = var_avgwidth,
+                               "Lower CI" = ci_lower,
+                               "Upper CI" = ci_upper)
+
+
+add in calculated CI research into issue with quantile
+
+
+library(kableExtra)
+
+summary.avgwidth %>%
+  signif(., 3) %>%
+  kable(caption = "Summary Results", align = "c") #%>%
+  #kable_classic_2()
+
+
+
+par(mfrow = c(2,2))
+hist(as.numeric(avg_cluster_widths_df[1,]), col = "lightcyan", main = "Cluster 1", xlab = "Average Cluster Width")
+abline(v = mean(as.numeric(avg_cluster_widths_df[1,])), col = "darkgrey", lty = 2, lwd = 2)
+hist(as.numeric(avg_cluster_widths_df[2,]), col = "lightpink", main = "Cluster 2", xlab = "Average Cluster Width")
+abline(v = mean(as.numeric(avg_cluster_widths_df[2,])), col = "darkgrey", lty = 2, lwd = 2)
+hist(as.numeric(avg_cluster_widths_df[3,]), col = "lightgreen", main = "Cluster 3", xlab = "Average Cluster Width")
+abline(v = mean(as.numeric(avg_cluster_widths_df[3,])), col = "darkgrey", lty = 2, lwd = 2)
+hist(as.numeric(avg_cluster_widths_df[4,]), col = "lightyellow", main = "Cluster 4", xlab = "Average Cluster Width")
+abline(v = mean(as.numeric(avg_cluster_widths_df[4,])), col = "darkgrey", lty = 2, lwd = 2)
+
+
+avg_width_over_groups <- colMeans(avg_cluster_widths_df)
+hist(avg_width_over_groups, breaks = 30, main = "Average Silhouette Score over 100 Bootstrap Samples",
+     xlab = "Average Silhouette Score")
+sd(avg_width_over_groups)
+
+
+### CI for avg width 
+mean(avg_width_over_groups)
+quantile(avg_width_over_groups, c(0.025, 0.975))
+
