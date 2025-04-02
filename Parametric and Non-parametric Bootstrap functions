@@ -1,0 +1,80 @@
+library(poLCA)
+library(boot)
+
+# define the formula
+formula <- cbind(PA, BEI, flor_cog, lone, das) ~ 1
+
+# function to simulate data from the fitted model (for parametric bootstrap)
+simulate_from_model <- function(model, data, nclass) {
+  sim_data <- poLCA.simdata(N = nrow(data), probs = model$probs, P = model$P)
+  sim_data <- as.data.frame(sim_data$dat)
+  colnames(sim_data) <- colnames(data)  # Ensure column names match the original data
+  return(sim_data)
+}
+
+# function to compute individual uncertainty (e_i)
+compute_e_i <- function(fit) {
+  1 - apply(fit$posterior, 1, max)
+}
+
+
+# function to compute aggregate entropy (EN_alpha)
+compute_EN_alpha <- function(fit) {
+  -1 * sum(apply(fit$posterior,2, function(x) sum((x+1e-10) * log(x + 1e-10))))
+}
+
+# function to compute relative entropy (E)
+compute_E <- function(fit) {
+  EN_alpha <- compute_EN_alpha(fit)
+  1 - (EN_alpha / (nrow(fit$posterior) * log(ncol(fit$posterior))))
+}
+
+# parametric bootstrap
+parametric_bootstrap <- function(data, model, nclass, n_boot = 100) {
+  boot_results <- lapply(1:n_boot, function(i) {
+    sim_data <- simulate_from_model(model, data, nclass)  # Simulate data from the fitted model
+    fit <- poLCA(formula, data = sim_data, nclass = nclass, verbose = F)
+    list(
+      e_i = compute_e_i(fit),
+      EN_alpha = compute_EN_alpha(fit),
+      E = compute_E(fit),
+      AIC = fit$aic,
+      BIC = fit$bic,
+      Gsq = fit$Gsq)
+  })
+  return(boot_results)
+}
+
+# nonparametric bootstrap
+nonparametric_bootstrap <- function(data, model, nclass, n_boot = 100) {
+  boot_results <- lapply(1:n_boot, function(i) {
+    resampled_data <- data[sample(nrow(data), replace = TRUE), ]
+    fit <- poLCA(formula, data = resampled_data, nclass = nclass, verbose = F)
+    list(
+      e_i = compute_e_i(fit),
+      EN_alpha = compute_EN_alpha(fit),
+      E = compute_E(fit),
+      AIC = fit$aic,
+      BIC = fit$bic,
+      Gsq = fit$Gsq)
+  })
+  return(boot_results)
+}
+
+analyze_results <- function(boot_results) {
+  e_i_dist <- sapply(boot_results, function(x) mean(x$e_i))
+  EN_alpha_dist <- sapply(boot_results, function(x) x$EN_alpha)
+  E_dist <- sapply(boot_results, function(x) x$E)
+  aic_dist <- sapply(boot_results, function(x) x$AIC)
+  bic_dist <- sapply(boot_results, function(x) x$BIC)
+  Gsq_dist <- sapply(boot_results, function(x) x$Gsq)
+  list(
+    e_i_mean = mean(e_i_dist),
+    e_i_ci = quantile(e_i_dist, c(0.025, 0.975)),
+    EN_alpha_mean = mean(EN_alpha_dist),
+    EN_alpha_ci = quantile(EN_alpha_dist, c(0.025, 0.975)),
+    E_mean = mean(E_dist),
+    E_ci = quantile(E_dist, c(0.025, 0.975)),
+    Gsq_mean = mean(Gsq_dist)
+  )
+}
