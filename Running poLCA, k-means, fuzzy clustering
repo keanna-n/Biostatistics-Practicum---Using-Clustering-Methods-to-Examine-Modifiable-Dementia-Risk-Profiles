@@ -1,4 +1,4 @@
- 40}
+
 library(factoextra)
 library(ggplot2)
 library(dplyr)
@@ -14,7 +14,7 @@ library(kableExtra)
 dat <- read.csv("/Users/keannanandlall/Downloads/merge_radar_data.csv")
 dat <- dat %>%
   drop_na(PA,BEI_score,Flor_Cog,Loneliness,DAS)
-dat$X <- as.numeric(dat$X)
+dat$X <- as.numeric(dat$X) ## ID 
 dat$PA <- (as.numeric(dat$PA))
 dat$BEI_score <- (as.numeric(dat$BEI_score))
 dat$Flor_Cog <- (as.numeric(dat$Flor_Cog))
@@ -32,13 +32,10 @@ row.names(max_min_radar) <- c("Max","Min")
 
 
 
-## Method 1 - k-means
+#################
+##Method 1 - k-means
 
- 43}
 standardize_dat <- as.data.frame(scale(dat[,-1]))
-
-
- 44}
 
 km_c3 <- kmeans(standardize_dat,3,nstart = 25)
 cluster3_data <- cbind(dat[,1] ,standardize_dat)
@@ -55,7 +52,6 @@ cluster5_data$cluster <- km_c5$cluster
 
 ### cluster 5 - RP
 
- 45}
 par(mfrow= c(3,2),mar = c(0.5, .5, 1, .5))
 
 for (i in 1:5){
@@ -69,10 +65,8 @@ for (i in 1:5){
   title(main = paste("Cluster", i))
 }
 
-
 ### cluster 4 - RP
 
- 46}
 par(mfrow= c(2,2),mar = c(0.5, .5, 1, .5))
 
 for (i in 1:4){
@@ -86,10 +80,8 @@ for (i in 1:4){
   title(main = paste("Cluster", i))
 }
 
-
 ### cluster 3 - RP
 
- 47}
 par(mfrow= c(2,2),mar = c(0.5, 0.01, 1, .3))
 
 for (i in 1:3){
@@ -104,9 +96,10 @@ for (i in 1:3){
 }
 
 
-## Method 2 - quartiled
+####################
+### Method 2 - quartiled
 
- 48}
+### formatting the quartiled categories 
 dat2 <- dat
 
 quartiled_data <- as.data.frame(
@@ -124,10 +117,8 @@ quartiled_data <- as.data.frame(
 )
 quartiled_data <- cbind(ID = dat[[1]], quartiled_data)
 colnames(quartiled_data) = c("ID", "PA", "BEI", "flor_cog", "lone", "das")
-#write.csv(quartiled_data,"quartiled.csv", row.names = F)
 
-
- 49}
+### running LCA 
 
 polca_q_3 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = quartiled_data, nclass = 3, 
                  nrep = 20,graphs = T, verbose = F)
@@ -141,7 +132,6 @@ polca_q_5 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = quartiled_data, n
 
 ### cluster 3 - RP
 
- 50}
 par(mfrow= c(2,2),mar = c(0.5, .5, 1, .5))
 
 for (i in 1:3){
@@ -158,7 +148,6 @@ for (i in 1:3){
 
 ### cluster 4 - RP
 
- 51}
 par(mfrow= c(2,2),mar = c(0.5, .5, 1, .5))
 
 for (i in 1:4){
@@ -175,7 +164,6 @@ for (i in 1:4){
 
 ### cluster 5 - RP
 
- 52}
 par(mfrow= c(2,3),mar = c(0.5, .5, 1, .5))
 
 for (i in 1:5){
@@ -191,8 +179,7 @@ for (i in 1:5){
 
 
 ## Method 3 - categorical (4 categories)
-
- 53, warning = F}
+##### formatting data 
 dat3 <- dat
 
 ## for PA - 7 days a week and max 180 min per day 
@@ -236,11 +223,8 @@ cat_data$das <- cut(dat3[,6], breaks = das_cat,
                       labels = F, 
                       include.lowest = TRUE)
 cat_data <- cbind(ID = dat3[,1], cat_data)
-#write.csv(cat_data,"cat_data.csv", row.names = F)
 
-
- 54}
-
+### running LCA
 polca4_3 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = cat_data, nclass = 3, 
                  nrep = 20,graphs = T, verbose = F)
 
@@ -253,7 +237,6 @@ polca4_5 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = cat_data, nclass =
 
 ### cluster 3 - RP
 
- 55}
 par(mfrow= c(2,2),mar = c(0.5, .5, 1, .5))
 
 for (i in 1:3){
@@ -270,7 +253,6 @@ for (i in 1:3){
 
 ### cluster 4 - RP
 
- 56}
 par(mfrow= c(2,2),mar = c(0.5, .5, 1, .5))
 
 for (i in 1:4){
@@ -287,7 +269,6 @@ for (i in 1:4){
 
 ### cluster 5 - RP
 
- 57}
 par(mfrow= c(2,2),mar = c(0.5, .5, 1, .5))
 
 for (i in 1:5){
@@ -304,7 +285,8 @@ for (i in 1:5){
 
 ## Method 4 - categorical (3 categories)
 
- 58, warning = F}
+### formatting data 
+
 dat4 <- dat
 
 ## for PA - 7 days a week and max 180 min per day 
@@ -336,18 +318,6 @@ level3 <- data.frame(
 )
 rownames(level3) <- c("0%", "34%", "67%", "100%")
 
-
-table2 <- level3 %>%
-  kable(
-  format = "html",  # Ensures LaTeX output
-  caption = "Cutoff Values for Grouping Data into Levels",
-  align = "c",
-  booktabs = TRUE  # Uses professional table formatting
-) %>%
-  kable_styling(latex_options = c("striped", "hold_position"))
-
-#save_kable(table2, file = "cutoff_table.pdf")
-
 cat_data3 <- as.data.frame(cut(dat4[,2], breaks = breaks_pa, 
                       labels = F, 
                       include.lowest = TRUE))
@@ -365,26 +335,20 @@ cat_data3$das <- cut(dat4[,6], breaks = breaks_das,
                       labels = F, 
                       include.lowest = TRUE)
 cat_data3 <- cbind(ID = dat4[,1], cat_data3)
-#write.csv(cat_data3,"cat_data3.csv", row.names = F)
 
-
- 59}
+### running LCA 
 
 polca3_3 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = cat_data3, nclass = 3, 
                  nrep = 20,graphs = T, verbose = F)
 
-#pdf("polca_34.pdf", width = 8, height = 6)
 polca3_4 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = cat_data3, nclass = 4,
                  nrep = 20, graphs = T, verbose = F)
-#dev.off()
 
 polca3_5 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = cat_data3, nclass = 5,
                  nrep = 20, graphs = T, verbose = F)
 
-
 ### cluster 3 - RP
 
- 60}
 par(mfrow= c(2,2),mar = c(0.5, .5, 1, .5))
 
 for (i in 1:3){
@@ -401,7 +365,6 @@ for (i in 1:3){
 
 ### cluster 4 - RP
 
- 61}
 par(mfrow= c(2,2),mar = c(0.5, .5, 1, .5))
 
 for (i in 1:4){
@@ -414,13 +377,6 @@ for (i in 1:4){
   radarchart(radar_dat,cglty = 1, cglcol = "gray")
   title(main = paste("Cluster", i))
 }
-
-
- 62}
-head(subset_class)
-head(class)
-head(radar_dat)
-
 
 ### cluster 5 - RP
 
