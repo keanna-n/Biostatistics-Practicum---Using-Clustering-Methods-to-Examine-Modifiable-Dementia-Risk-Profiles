@@ -1,0 +1,229 @@
+
+library(dplyr)
+data1 <- read.csv("C:/Users/knandlall/Documents/champs_activities_questionnaire_for_older_adults.csv")
+data1 <- read.csv("C:\\Users\\knandlall\\Documents\\champs_activities_questionnaire_for_older_adults.csv")
+
+data1 <- champs_activities_questionnaire_for_older_adults
+table(is.na(champs_activities_questionnaire_for_older_adults$champs_date))
+table(is.na(data1$champs_dance_yn))
+subset_data1 <- data1[!is.na(data1$champs_date), ]
+subset_data1 <- data1[, -c(1:4)]
+subset_data1[is.na(subset_data1)] <- 0 
+
+
+
+## head injury 
+data2 <- head_injury_history
+
+subset_data2 <- data2[!is.na(data2$head_injury_date), ]
+table(is.na(head_injury_history$head_injury_date))
+subset_data2<- subset_data2[, -c(1:3)]
+subset_data2_1 <- subset_data2$head_injury
+barplot(table(subset_data2_1))
+title("Head Injury")
+
+missingid1 <- champs_activities_questionnaire_for_older_adults$record_id[is.na(
+  champs_activities_questionnaire_for_older_adults$champs_date)]
+missingid2 <- head_injury_history$record_id[head_injury_history$record_id %in% missingid1
+                                            & is.na(head_injury_history$head_injury_date)]
+print.table(as.matrix(missingid2))
+
+missingid2_0 <- head_injury_history$record_id[is.na(head_injury_history$head_injury_date)]
+diff <- c(setdiff(missingid1,missingid2_0),setdiff(missingid2_0,missingid1))
+print.table(as.matrix(diff))
+
+check_missing <- function(d1_na_ids,d2_na_ids){
+  missing <- c(setdiff(d1_na_ids,d2_na_ids),setdiff(d2_na_ids,d1_na_ids))
+  if (is.na(missing[1]) == TRUE){
+    return(cat("All are same"))
+  }
+  return(as.matrix(missing))
+}
+
+## sociodemo 
+
+data3 <- demographics
+subset_data3 <- demographics
+table(is.na(demographics$demog_date))
+subset_data3 <- data3[!is.na(data3$demog_date), ]
+subset_data3 <- subset_data3[, -c(1:4)]
+table(is.na(subset_data3$demog_income))
+
+income_table <- table(subset_data3$demog_income)
+
+barplot(income_table, names.arg = names(income_table), 
+        ylab = "Frequency", 
+        main = "Income Distribution", las = 2, cex.names = 0.6)
+
+demo_miss <- demographics$record_id[is.na(demographics$demog_date)]
+check_missing(missingid2_0,demo_miss)
+check_missing(demo_miss,missingid1)
+
+## subjective cognitive decline
+subj_cog <- subjective_cognitive_impairment
+table(is.na(subjective_cognitive_impairment$jessen_date))
+subj_cog <- subj_cog[!is.na(subj_cog$jessen_date), ]
+subj_cog <- subj_cog[,-c(1:4)]
+subj_cog[is.na(subj_cog)] <- "No"
+
+subj_miss <- subjective_cognitive_impairment$record_id[is.na(subjective_cognitive_impairment$jessen_date)]
+check_missing(subj_miss,demo_miss)
+## get active 
+
+get_act <- get_active_questionnaire
+table(is.na(get_active_questionnaire$getactive_date))
+get_act <- get_act[!is.na(get_act$getactive_date), ]
+get_act <- get_act[, -c(1:4)]
+table(get_act$getactive_days_pa)
+barplot(table(get_act$getactive_days_pa), 
+        main = "Days of Physical Activity", 
+        ylab = "Frequency")
+
+act_miss <- get_active_questionnaire$record_id[is.na(get_active_questionnaire$getactive_date)]
+check_missing(act_miss,subj_miss)
+#florida cognitive 
+
+flor_cog <- florida_cognitive_activities_scale
+table(is.na(florida_cognitive_activities_scale$fcas_date))
+flor_cog <- flor_cog[!is.na(flor_cog$fcas_date), ]
+flor_cog <- flor_cog[, -c(1:4)]
+flor_cog$musicduration[is.na(flor_cog$musicduration)] <- "0"
+flor_cog$musicpractice[is.na(flor_cog$musicpractice)] <- "0"
+flor_cog$volunteerhrs[is.na(flor_cog$volunteerhrs)] <- "0"
+
+head(flor_cog[,1:29]) #gets rid of duration 
+
+flor_miss <- florida_cognitive_activities_scale$record_id[is.na(florida_cognitive_activities_scale$fcas_date)]
+check_missing(act_miss,flor_miss)
+##loneliness
+
+lone <- loneliness
+table(is.na(loneliness$loneliness_date))
+lone <- lone[!is.na(loneliness$loneliness_date), ]
+lone <- lone[, -c(1:4)]
+
+## depression, anxiety, stress
+
+das <- depression_anxiety_and_stress
+table(is.na(depression_anxiety_and_stress$dass_date))
+das <- das[!is.na(das$dass_date), ]
+das <- das[, -c(1:4)]
+
+## perceived stress
+# brian will send function - good to sum 
+perc_str <- perceived_stress_scale
+table(is.na(perceived_stress_scale$pss_date))
+perc_str <- perc_str[!is.na(perc_str$pss_date), ]
+perc_str <- perc_str[, -c(1:4)]
+
+## eating pattern self-assessment 
+
+eat_patt <- brain_health_food_guide
+table(is.na(brain_health_food_guide$epsa_date))
+eat_patt <- eat_patt[!is.na(eat_patt$epsa_date), ]
+eat_patt <- eat_patt[, -c(1:4)]
+
+## personality
+
+personty <- personality
+table(is.na(personality$bfi_date))
+personty <- personty[!is.na(personty$bfi_date), ]
+personty <- personty[, -c(1:4)]
+table(is.na(personty))
+
+## sense of meaning 
+
+SOM <- selfefficacy
+table(is.na(selfefficacy$self_efficacy_date))
+SOM <- SOM[!is.na(SOM$self_efficacy_date), ]
+SOM <- SOM[, -c(1:3)]
+table(is.na(SOM))
+
+## caregiver status & family history 
+
+fam_hx <- caregiver_status_and_family_history_of_dementia
+table(is.na(caregiver_status_and_family_history_of_dementia$family_hx_date))
+fam_hx <- fam_hx[!is.na(fam_hx$family_hx_date), ]
+cgiver <- fam_hx[5]
+fam_hx <- fam_hx[, -c(1:5)]
+table(is.na(fam_hx))
+table(is.na(cgiver))
+
+## revised hearing and vision and hearing risk scale 
+
+vis_hear <- vision_and_hearing_correction
+table(is.na(vision_and_hearing_correction$vision_date))
+vis_hear <- vis_hear[!is.na(vis_hear$vision_date), ]
+vis_hear <- vis_hear[, -c(1:3)]
+table(is.na(vis_hear))
+
+#alcohol and smoking 
+
+alc_smok <- alcohol_consumption_and_smoking_history
+table(is.na(alcohol_consumption_and_smoking_history$alcohol_date))
+alc_smok <- alc_smok[!is.na(alc_smok$alcohol_date), ]
+alc_smok <- alc_smok[, -c(1:3)]
+
+## medications & adherance 
+### # of medication taking for now 
+## separate recreational drugs 
+#interested in diabetes and BP (up to sleep)
+
+med_adh <- medications
+table(is.na(medications$meds_date))
+med_adh <- med_adh[!is.na(med_adh$meds_date), ]
+med_adh <- med_adh[, -c(1:3)]
+
+## health conditions part 12 
+## group by body system - for 12 and 22 
+health_conditions_part_12 <- read.csv("C:/Users/knandlall/Documents/health_conditions_part_12.csv")
+hlth_12 <- health_conditions_part_12
+table(is.na(health_conditions_part_12$health_conditions_date))
+hlth_12 <- hlth_12[!is.na(hlth_12$health_conditions_date), ]
+hlth_12 <- hlth_12[, -c(1:3)]
+table(is.na(hlth_12))
+
+## health conditions part 22
+
+health_conditions_part_22 <- read.csv("C:/Users/knandlall/Documents/health_conditions_part_22.csv")
+hlth_22 <- health_conditions_part_22
+table(is.na(health_conditions_part_22$health_conditions_date_2))
+hlth_22 <- hlth_22[!is.na(hlth_22$health_conditions_date_2), ]
+hlth_22 <- hlth_22[, -c(1:3)]
+table(is.na(hlth_22))
+
+## menopause 
+# the NAs are because of gender 
+menopause_status_and_age <- read.csv("C:/Users/knandlall/Documents/menopause_status_and_age.csv",
+                                     na.strings = c("", " "))
+## checking to see if the missing IDs are males 
+table(is.na(menopause_status_and_age$health_conditions_menopause_age))
+missing_males <- menopause_status_and_age$
+  record_id[is.na(menopause_status_and_age$health_conditions_menopause_age)]
+females_meno <- menopause_status_and_age$
+  record_id[!is.na(menopause_status_and_age$health_conditions_menopause_age)]
+male_ids <- demographics$record_id[(demographics$demog_sex == "Male")]
+female_ids <- demographics$record_id[(demographics$demog_sex == "Female")]
+
+setdiff(missing_males,male_ids)
+setdiff(females_meno,female_ids)
+
+## falls within this year
+
+falls_in_last_year_and_resulting_fractures <- read.csv(
+  "C:/Users/knandlall/Documents/falls_in_last_year_and_resulting_fractures.csv",
+  na.strings = c("", " "))
+table(is.na(falls_in_last_year_and_resulting_fractures$falls_date))
+falls <- falls_in_last_year_and_resulting_fractures[
+  !is.na(falls_in_last_year_and_resulting_fractures$falls_date), ]
+falls <- falls[,-c(1:3)]
+
+## your sleep - brain health pro's sleep assessment 
+
+your_sleep <- read.csv("C:/Users/knandlall/Documents/your_sleep.csv",
+                       na.strings = c("", " "))
+table(is.na(your_sleep$sleep_date))
+sleep <- your_sleep[!is.na(your_sleep$sleep_date),]
+sleep <- sleep[,-c(1:3)]
+
+demo_table
