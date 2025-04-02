@@ -1,0 +1,133 @@
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(factoextra)
+library(NbClust)
+
+## load and format data 
+merge_radar_data <- read.csv("/Users/keannanandlall/Downloads/merge_radar_data.csv")
+merge_radar_data <- merge_radar_data %>%
+  drop_na(PA,BEI_score,Flor_Cog,Loneliness,DAS)
+merge_radar_data$X <- as.numeric(merge_radar_data$X)
+merge_radar_data$PA <- (as.numeric(merge_radar_data$PA))
+merge_radar_data$BEI_score <- (as.numeric(merge_radar_data$BEI_score))
+merge_radar_data$Flor_Cog <- (as.numeric(merge_radar_data$Flor_Cog))
+merge_radar_data$Loneliness <- (as.numeric(merge_radar_data$Loneliness))
+merge_radar_data$DAS <- (as.numeric(merge_radar_data$DAS))
+
+standardize_MRD <- as.data.frame(scale(merge_radar_data[,-1]))
+
+# Elbow method
+fviz_nbclust(standardize_MRD, kmeans, method = "wss") +
+    geom_vline(xintercept = 4, linetype = 2)+
+  labs(subtitle = "Elbow method")
+
+# Silhouette method
+fviz_nbclust(standardize_MRD, kmeans, method = "silhouette")+
+  labs(subtitle = "Silhouette method")
+
+# Gap statistic
+# nboot = 50 to keep the function speedy. 
+set.seed(123)
+fviz_nbclust(standardize_MRD, kmeans, nstart = 25,  method = "gap_stat", nboot = 50)+
+  labs(subtitle = "Gap statistic method",verbose = F)
+
+## visualizing clusters to choose optimal number 
+km_c3 <- kmeans(standardize_MRD,3,nstart = 25)
+cluster3_data <- cbind(merge_radar_data[,1] ,standardize_MRD)
+cluster3_data$cluster <- km_c3$cluster
+
+km_c4 <- kmeans(standardize_MRD,4,nstart = 25)
+cluster4_data <- cbind(merge_radar_data[,1] ,standardize_MRD)
+cluster4_data$cluster <- km_c4$cluster
+
+km_c5 <- kmeans(standardize_MRD,5,nstart = 25)
+cluster5_data <- cbind(merge_radar_data[,1] ,standardize_MRD)
+cluster5_data$cluster <- km_c5$cluster
+
+km_c6 <- kmeans(standardize_MRD,6,nstart = 25)
+cluster6_data <- cbind(merge_radar_data[,1] ,standardize_MRD)
+cluster6_data$cluster <- km_c6$cluster
+
+km_c10 <- kmeans(standardize_MRD,10,nstart = 25)
+cluster10_data <- cbind(merge_radar_data[,1] ,standardize_MRD)
+cluster10_data$cluster <- km_c10$cluster
+
+## radar plots to look for unique profiles and reasonable cluster sizes 
+max_min_radar <- data.frame(PA = c(1260,0),
+                            BEI_score = c(15,0),Flor_Cog = c(40,0),
+                            Loneliness = c(80,0), DAS = c(63,0))
+row.names(max_min_radar) <- c("Max","Min")
+
+### cluster = 10 
+par(mfrow= c(3,4),mar = c(0.5, .5, 1, .5))
+
+for (i in 1:10){
+
+  class <- as.matrix(merge_radar_data$X[cluster10_data$cluster == i])
+  subset_class <- merge_radar_data %>%
+    filter(X %in% class)
+  radar_dat <- rbind(max_min_radar,subset_class[,-c(1,7)])
+  
+  radarchart(radar_dat,cglty = 1, cglcol = "gray")
+  title(main = paste("Cluster", i))
+}
+
+### cluster = 6 
+par(mfrow= c(3,2),mar = c(0.5, .5, 1, .5))
+
+for (i in 1:6){
+
+  class <- as.matrix(merge_radar_data$X[cluster6_data$cluster == i])
+  subset_class <- merge_radar_data %>%
+    filter(X %in% class)
+  radar_dat <- rbind(max_min_radar,subset_class[,-c(1,7)])
+  
+  radarchart(radar_dat,cglty = 1, cglcol = "gray")
+  title(main = paste("Cluster", i))
+}
+
+### cluster = 5 
+par(mfrow= c(3,2),mar = c(0.5, .5, 1, .5))
+
+for (i in 1:5){
+
+  class <- as.matrix(merge_radar_data$X[cluster5_data$cluster == i])
+  subset_class <- merge_radar_data %>%
+    filter(X %in% class)
+  radar_dat <- rbind(max_min_radar,subset_class[,-c(1,7)])
+  
+  radarchart(radar_dat,cglty = 1, cglcol = "gray")
+  title(main = paste("Cluster", i))
+}
+
+### cluster = 4
+
+par(mfrow= c(2,2),mar = c(0.5, .5, 1, .5))
+
+for (i in 1:4){
+
+  class <- as.matrix(merge_radar_data$X[cluster4_data$cluster == i])
+  subset_class <- merge_radar_data %>%
+    filter(X %in% class)
+  radar_dat <- rbind(max_min_radar,subset_class[,-c(1,7)])
+  
+  radarchart(radar_dat,cglty = 1, cglcol = "gray")
+  title(main = paste("Cluster", i))
+}
+
+### cluster = 3 
+
+par(mfrow= c(2,2),mar = c(0.5, .5, 1, .5))
+
+for (i in 1:3){
+
+  class <- as.matrix(merge_radar_data$X[cluster3_data$cluster == i])
+  subset_class <- merge_radar_data %>%
+    filter(X %in% class)
+  radar_dat <- rbind(max_min_radar,subset_class[,-c(1,7)])
+  
+  radarchart(radar_dat,cglty = 1, cglcol = "gray")
+  title(main = paste("Cluster", i))
+}
+
