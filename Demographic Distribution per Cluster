@@ -1,0 +1,33 @@
+cat_data3 <- read.csv("cat_data3.csv")
+demo_data <- read.csv("demo.subset.csv")
+demo_subset <- demo_data[,c("record_id","Sex","Age","Age_Ranges")]
+demo_subset$record_id <- as.numeric(demo_subset$record_id)
+rownames(demo_subset) <- demo_subset$record_id
+
+## merging data 
+age.sex.cat3 <- merge(cat_data3, demo_subset, by.x = "ID", by.y = "record_id", all.x = TRUE)
+age.sex.cat3$Sex <- as.factor(age.sex.cat3$Sex)
+
+## run model 
+set.seed(123)
+model <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = age.sex.cat3, nclass = 4,
+                 nrep = 20, graphs = T, verbose = F)
+
+# add predicted class probabilities to the dataset
+age.sex.cat3$predclass <- model$predclass
+age.sex.cat3$predprob <- apply(model$posterior, 1, max)
+
+# plot predicted class probabilities by Age and Sex
+library(ggplot2)
+ggplot(age.sex.cat3, aes(x = Age, y = predprob, color = Sex)) +
+  geom_smooth(se = F) +
+  labs(x = "Age", y = "Predicted Probability", title = "Predicted Class Probabilities by Age and Sex") + 
+  theme_minimal()
+
+## distribution of sex 
+ggplot(age.sex.cat3, aes(x = predclass, fill = Sex)) + 
+  geom_bar(stat = "count")
+
+## distribution of age ranges 
+ggplot(age.sex.cat3, aes(x = predclass, fill = Age_Ranges)) + 
+  geom_bar(stat = "count")
