@@ -1,0 +1,488 @@
+ 40}
+library(factoextra)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(poLCA)
+library(fmsb)
+library(kableExtra)
+
+
+## load data
+
+ 41}
+dat <- read.csv("/Users/keannanandlall/Downloads/merge_radar_data.csv")
+dat <- dat %>%
+  drop_na(PA,BEI_score,Flor_Cog,Loneliness,DAS)
+dat$X <- as.numeric(dat$X)
+dat$PA <- (as.numeric(dat$PA))
+dat$BEI_score <- (as.numeric(dat$BEI_score))
+dat$Flor_Cog <- (as.numeric(dat$Flor_Cog))
+dat$Loneliness <- (as.numeric(dat$Loneliness))
+dat$DAS <- (as.numeric(dat$DAS))
+
+
+## Radar Data
+
+ 42}
+max_min_radar <- data.frame(PA = c(1260,0),
+                            BEI_score = c(15,0),Flor_Cog = c(40,0),
+                            Loneliness = c(80,20), DAS = c(63,0))
+row.names(max_min_radar) <- c("Max","Min")
+
+
+
+## Method 1 - k-means
+
+ 43}
+standardize_dat <- as.data.frame(scale(dat[,-1]))
+
+
+ 44}
+
+km_c3 <- kmeans(standardize_dat,3,nstart = 25)
+cluster3_data <- cbind(dat[,1] ,standardize_dat)
+cluster3_data$cluster <- km_c3$cluster
+
+km_c4 <- kmeans(standardize_dat,4,nstart = 25)
+cluster4_data <- cbind(dat[,1] ,standardize_dat)
+cluster4_data$cluster <- km_c4$cluster
+
+km_c5 <- kmeans(standardize_dat,5,nstart = 25)
+cluster5_data <- cbind(dat[,1] ,standardize_dat)
+cluster5_data$cluster <- km_c5$cluster
+
+
+### cluster 5 - RP
+
+ 45}
+par(mfrow= c(3,2),mar = c(0.5, .5, 1, .5))
+
+for (i in 1:5){
+
+  class <- as.matrix(dat$X[cluster5_data$cluster == i])
+  subset_class <- dat %>%
+    filter(X %in% class)
+  radar_dat <- rbind(max_min_radar,subset_class[,-c(1,7)])
+  
+  radarchart(radar_dat,cglty = 1, cglcol = "gray")
+  title(main = paste("Cluster", i))
+}
+
+
+### cluster 4 - RP
+
+ 46}
+par(mfrow= c(2,2),mar = c(0.5, .5, 1, .5))
+
+for (i in 1:4){
+
+  class <- as.matrix(dat$X[cluster5_data$cluster == i])
+  subset_class <- dat %>%
+    filter(X %in% class)
+  radar_dat <- rbind(max_min_radar,subset_class[,-c(1,7)])
+  
+  radarchart(radar_dat,cglty = 1, cglcol = "gray")
+  title(main = paste("Cluster", i))
+}
+
+
+### cluster 3 - RP
+
+ 47}
+par(mfrow= c(2,2),mar = c(0.5, 0.01, 1, .3))
+
+for (i in 1:3){
+
+  class <- as.matrix(dat$X[cluster5_data$cluster == i])
+  subset_class <- dat %>%
+    filter(X %in% class)
+  radar_dat <- rbind(max_min_radar,subset_class[,-c(1,7)])
+  
+  radarchart(radar_dat,cglty = 1, cglcol = "gray")
+  title(main = paste("Cluster", i))
+}
+
+
+## Method 2 - quartiled
+
+ 48}
+dat2 <- dat
+
+quartiled_data <- as.data.frame(
+  lapply(dat2[,-1], function(x) {
+    # Computes the quartiles (0%, 25%, 50%, 75%, 100%)
+    breaks <- unique(quantile(x, probs = seq(0, 1, 0.25), na.rm = TRUE))
+    # Check if breaks are valid, then cut; otherwise, assign NA
+    if (length(breaks) > 1) {
+      #labels = FALSE assigns numerical category labels instead of factors.
+      cut(x, breaks = breaks, include.lowest = TRUE, labels = FALSE)
+    } else {
+      rep(NA, length(x))  # If breaks are not unique, assign NA
+    }
+  })
+)
+quartiled_data <- cbind(ID = dat[[1]], quartiled_data)
+colnames(quartiled_data) = c("ID", "PA", "BEI", "flor_cog", "lone", "das")
+#write.csv(quartiled_data,"quartiled.csv", row.names = F)
+
+
+ 49}
+
+polca_q_3 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = quartiled_data, nclass = 3, 
+                 nrep = 20,graphs = T, verbose = F)
+
+polca_q_4 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = quartiled_data, nclass = 4,
+                 nrep = 20, graphs = T, verbose = F)
+
+polca_q_5 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = quartiled_data, nclass = 5,
+                 nrep = 20, graphs = T, verbose = F)
+
+
+### cluster 3 - RP
+
+ 50}
+par(mfrow= c(2,2),mar = c(0.5, .5, 1, .5))
+
+for (i in 1:3){
+
+  class <- as.matrix(dat$X[polca_q_3$predclass == i])
+  subset_class <- dat %>%
+    filter(X %in% class)
+  radar_dat <- rbind(max_min_radar,subset_class[,-c(1,7)])
+  
+  radarchart(radar_dat,cglty = 1, cglcol = "gray")
+  title(main = paste("Cluster", i))
+}
+
+
+### cluster 4 - RP
+
+ 51}
+par(mfrow= c(2,2),mar = c(0.5, .5, 1, .5))
+
+for (i in 1:4){
+
+  class <- as.matrix(dat$X[polca_q_4$predclass == i])
+  subset_class <- dat %>%
+    filter(X %in% class)
+  radar_dat <- rbind(max_min_radar,subset_class[,-c(1,7)])
+  
+  radarchart(radar_dat,cglty = 1, cglcol = "gray")
+  title(main = paste("Cluster", i))
+}
+
+
+### cluster 5 - RP
+
+ 52}
+par(mfrow= c(2,3),mar = c(0.5, .5, 1, .5))
+
+for (i in 1:5){
+
+  class <- as.matrix(dat$X[polca_q_5$predclass == i])
+  subset_class <- dat %>%
+    filter(X %in% class)
+  radar_dat <- rbind(max_min_radar,subset_class[,-c(1,7)])
+  
+  radarchart(radar_dat,cglty = 1, cglcol = "gray")
+  title(main = paste("Cluster", i))
+}
+
+
+## Method 3 - categorical (4 categories)
+
+ 53, warning = F}
+dat3 <- dat
+
+## for PA - 7 days a week and max 180 min per day 
+days <- matrix(1:7,1,7)
+min <- matrix(0:181,181,1)
+pa <- min%*%days
+pa <- sort(pa)
+pa <- pa[!duplicated(pa)]
+pa_cat <- round(quantile(pa),0)
+
+## BEI 
+BEI <- c(0:15)
+bei_cat <- quantile(BEI)
+
+## flor_cog 
+flor_cog <- c(0:40)
+fc_cat <- quantile(flor_cog)
+
+## loneliness 
+lone <- c(20:80)
+lone_cat <- quantile(lone)
+
+## das 
+das <- c(0:63)
+das_cat <- quantile(das)
+
+cat_data <- as.data.frame(cut(dat3[,2], breaks = pa_cat, 
+                      labels = F, 
+                      include.lowest = TRUE))
+colnames(cat_data) <- "PA"
+cat_data$BEI <- cut(dat3[,3], breaks = bei_cat, 
+                      labels = F, 
+                      include.lowest = TRUE)
+cat_data$flor_cog <- cut(dat3[,4], breaks = fc_cat, 
+                      labels = F, 
+                      include.lowest = TRUE)
+cat_data$lone <- cut(dat3[,5], breaks = lone_cat, 
+                      labels = F, 
+                      include.lowest = TRUE)
+cat_data$das <- cut(dat3[,6], breaks = das_cat, 
+                      labels = F, 
+                      include.lowest = TRUE)
+cat_data <- cbind(ID = dat3[,1], cat_data)
+#write.csv(cat_data,"cat_data.csv", row.names = F)
+
+
+ 54}
+
+polca4_3 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = cat_data, nclass = 3, 
+                 nrep = 20,graphs = T, verbose = F)
+
+polca4_4 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = cat_data, nclass = 4,
+                 nrep = 20, graphs = T, verbose = F)
+
+polca4_5 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = cat_data, nclass = 5,
+                 nrep = 20, graphs = T, verbose = F)
+
+
+### cluster 3 - RP
+
+ 55}
+par(mfrow= c(2,2),mar = c(0.5, .5, 1, .5))
+
+for (i in 1:3){
+
+  class <- as.matrix(dat$X[polca4_3$predclass == i])
+  subset_class <- dat %>%
+    filter(X %in% class)
+  radar_dat <- rbind(max_min_radar,subset_class[,-c(1,7)])
+  
+  radarchart(radar_dat,cglty = 1, cglcol = "gray")
+  title(main = paste("Cluster", i))
+}
+
+
+### cluster 4 - RP
+
+ 56}
+par(mfrow= c(2,2),mar = c(0.5, .5, 1, .5))
+
+for (i in 1:4){
+
+  class <- as.matrix(dat$X[polca4_4$predclass == i])
+  subset_class <- dat %>%
+    filter(X %in% class)
+  radar_dat <- rbind(max_min_radar,subset_class[,-c(1,7)])
+  
+  radarchart(radar_dat,cglty = 1, cglcol = "gray")
+  title(main = paste("Cluster", i))
+}
+
+
+### cluster 5 - RP
+
+ 57}
+par(mfrow= c(2,2),mar = c(0.5, .5, 1, .5))
+
+for (i in 1:5){
+
+  class <- as.matrix(dat$X[polca4_5$predclass == i])
+  subset_class <- dat %>%
+    filter(X %in% class)
+  radar_dat <- rbind(max_min_radar,subset_class[,-c(1,7)])
+  
+  radarchart(radar_dat,cglty = 1, cglcol = "gray")
+  title(main = paste("Cluster", i))
+}
+
+
+## Method 4 - categorical (3 categories)
+
+ 58, warning = F}
+dat4 <- dat
+
+## for PA - 7 days a week and max 180 min per day 
+days <- matrix(1:7,1,7)
+min <- matrix(0:181,181,1)
+pa <- min%*%days
+pa <- sort(pa)
+pa <- pa[!duplicated(pa)]
+breaks_pa <- ceiling(quantile(pa, probs = seq(0,1,0.3333)))
+## BEI 
+BEI <- c(0:15)
+breaks_BEI <- ceiling(quantile(BEI, probs = seq(0,1,0.3333)))
+## flor_cog 
+flor_cog <- c(0:40)
+breaks_fc <- ceiling(quantile(flor_cog, probs = seq(0,1,0.3333)))
+## loneliness 
+lone <- c(20:80)
+breaks_lone <- ceiling(quantile(lone, probs = seq(0,1,0.3333)))
+## das 
+das <- c(0:63)
+breaks_das <- ceiling(quantile(das, probs = seq(0,1,0.3333)))
+
+level3 <- data.frame(
+  PA = breaks_pa,
+  BEI = breaks_BEI,
+  DAS = breaks_das,
+  Loneliness = breaks_lone,
+  Cognitive = breaks_fc
+)
+rownames(level3) <- c("0%", "34%", "67%", "100%")
+
+
+table2 <- level3 %>%
+  kable(
+  format = "html",  # Ensures LaTeX output
+  caption = "Cutoff Values for Grouping Data into Levels",
+  align = "c",
+  booktabs = TRUE  # Uses professional table formatting
+) %>%
+  kable_styling(latex_options = c("striped", "hold_position"))
+
+#save_kable(table2, file = "cutoff_table.pdf")
+
+cat_data3 <- as.data.frame(cut(dat4[,2], breaks = breaks_pa, 
+                      labels = F, 
+                      include.lowest = TRUE))
+colnames(cat_data3) <- "PA"
+cat_data3$BEI <- cut(dat4[,3], breaks = breaks_BEI, 
+                      labels = F, 
+                      include.lowest = TRUE)
+cat_data3$flor_cog <- cut(dat4[,4], breaks = breaks_fc, 
+                      labels = F, 
+                      include.lowest = TRUE)
+cat_data3$lone <- cut(dat4[,5], breaks = breaks_lone, 
+                      labels = F, 
+                      include.lowest = TRUE)
+cat_data3$das <- cut(dat4[,6], breaks = breaks_das, 
+                      labels = F, 
+                      include.lowest = TRUE)
+cat_data3 <- cbind(ID = dat4[,1], cat_data3)
+#write.csv(cat_data3,"cat_data3.csv", row.names = F)
+
+
+ 59}
+
+polca3_3 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = cat_data3, nclass = 3, 
+                 nrep = 20,graphs = T, verbose = F)
+
+#pdf("polca_34.pdf", width = 8, height = 6)
+polca3_4 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = cat_data3, nclass = 4,
+                 nrep = 20, graphs = T, verbose = F)
+#dev.off()
+
+polca3_5 <- poLCA(cbind(PA,BEI,flor_cog,lone,das) ~ 1, data = cat_data3, nclass = 5,
+                 nrep = 20, graphs = T, verbose = F)
+
+
+### cluster 3 - RP
+
+ 60}
+par(mfrow= c(2,2),mar = c(0.5, .5, 1, .5))
+
+for (i in 1:3){
+
+  class <- as.matrix(dat$X[polca3_3$predclass == i])
+  subset_class <- dat %>%
+    filter(X %in% class)
+  radar_dat <- rbind(max_min_radar,subset_class[,-c(1,7)])
+  
+  radarchart(radar_dat,cglty = 1, cglcol = "gray")
+  title(main = paste("Cluster", i))
+}
+
+
+### cluster 4 - RP
+
+ 61}
+par(mfrow= c(2,2),mar = c(0.5, .5, 1, .5))
+
+for (i in 1:4){
+
+  class <- as.matrix(dat$X[polca3_4$predclass == i])
+  subset_class <- dat %>%
+    filter(X %in% class)
+  radar_dat <- rbind(max_min_radar,subset_class[,-c(1,7)])
+  
+  radarchart(radar_dat,cglty = 1, cglcol = "gray")
+  title(main = paste("Cluster", i))
+}
+
+
+ 62}
+head(subset_class)
+head(class)
+head(radar_dat)
+
+
+### cluster 5 - RP
+
+par(mfrow= c(2,3),mar = c(0.5, .5, 1, .5))
+
+for (i in 1:5){
+
+  class <- as.matrix(dat$X[polca3_5$predclass == i])
+  subset_class <- dat %>%
+    filter(X %in% class)
+  radar_dat <- rbind(max_min_radar,subset_class[,-c(1,7)])
+  
+  radarchart(radar_dat,cglty = 1, cglcol = "gray")
+  title(main = paste("Cluster", i))
+}
+
+################## fuzzy clusters 
+## 3 clusters 
+
+fuzzy_result_3 <- cmeans(standardize_dat, centers = 3, m = 2)
+
+par(mfrow= c(1,3),mar = c(0.5, .5, 1, .5))
+
+for (i in 1:3){
+
+  class <- as.matrix(dat$X[fuzzy_result_3$membership == i])
+  subset_class <- dat %>%
+    filter(X %in% class)
+  radar_dat <- rbind(max_min_radar,subset_class[,-c(1,7)])
+  
+  radarchart(radar_dat,cglty = 1, cglcol = "gray")
+  title(main = paste("Cluster", i))
+}
+## 4 clusters 
+
+fuzzy_result_4 <- cmeans(standardize_dat, centers = 4, m = 2)
+
+par(mfrow= c(2,2),mar = c(0.5, .5, 1, .5))
+
+for (i in 1:4){
+
+  class <- as.matrix(dat$X[fuzzy_result_4$membership == i])
+  subset_class <- dat %>%
+    filter(X %in% class)
+  radar_dat <- rbind(max_min_radar,subset_class[,-c(1,7)])
+  
+  radarchart(radar_dat,cglty = 1, cglcol = "gray")
+  title(main = paste("Cluster", i))
+}
+
+## 5 cluster 
+fuzzy_result_5 <- cmeans(standardize_dat, centers = 5, m = 2)
+
+par(mfrow= c(2,3),mar = c(0.5, .5, 1, .5))
+
+for (i in 1:5){
+
+  class <- as.matrix(dat$X[fuzzy_result_5$membership == i])
+  subset_class <- dat %>%
+    filter(X %in% class)
+  radar_dat <- rbind(max_min_radar,subset_class[,-c(1,7)])
+  
+  radarchart(radar_dat,cglty = 1, cglcol = "gray")
+  title(main = paste("Cluster", i))
+}
