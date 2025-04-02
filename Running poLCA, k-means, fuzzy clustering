@@ -10,7 +10,6 @@ library(kableExtra)
 
 ## load data
 
- 41}
 dat <- read.csv("/Users/keannanandlall/Downloads/merge_radar_data.csv")
 dat <- dat %>%
   drop_na(PA,BEI_score,Flor_Cog,Loneliness,DAS)
@@ -24,13 +23,12 @@ dat$DAS <- (as.numeric(dat$DAS))
 
 ## Radar Data
 
- 42}
 max_min_radar <- data.frame(PA = c(1260,0),
                             BEI_score = c(15,0),Flor_Cog = c(40,0),
                             Loneliness = c(80,20), DAS = c(63,0))
 row.names(max_min_radar) <- c("Max","Min")
 
-
+set.seed(123)
 
 #################
 ##Method 1 - k-means
