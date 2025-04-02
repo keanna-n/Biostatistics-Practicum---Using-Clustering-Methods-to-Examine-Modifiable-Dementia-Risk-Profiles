@@ -1,0 +1,260 @@
+library(ggplot2)
+
+#here i cleaned the data 
+
+library(dplyr)
+library(ggplot2)
+
+## used on all the variables to see who was missing what questionnaire 
+missing_vals <- list()
+
+check_missing <- function(d1_na_ids,d2_na_ids, print = "no"){
+  missing <- c(setdiff(d1_na_ids,d2_na_ids),setdiff(d2_na_ids,d1_na_ids))
+  
+  missing_vals <<- append(missing_vals,d1_na_ids)
+  missing_vals <<- append(missing_vals, list(missing))
+  missing_vals <<- lapply(missing_vals,unique)
+  missing_vals <<- unique(missing_vals)
+  if (print == "yes"){
+    cat("Missing values:",sep = '\n')
+    print(as.matrix(missing_vals))
+  }
+  if (is.na(missing[1]) == TRUE){
+    
+    return("All are same")
+  }
+  return(as.matrix(missing))
+}
+
+#### Demographics 
+demographics <- read.csv("C:/Users/knandlall/Documents/demographics.csv",na.strings = c("", " "))
+cat("Table of Missing Vals")
+table(is.na(demographics$demog_date))
+demo <- demographics
+demo <- demo[!is.na(demographics$demog_date), ]
+demo <- demo[, -c(2,4)]
+table(is.na(demo$demog_income))
+
+table(is.na(demo$demog_birthplace_oth)) #all are NA here, good to ignore
+table(is.na(demo$demog_sexother)) #none
+table(is.na(demo$demog_genderother)) #none
+demo$demog_raceother2 <- demo$demog_raceother
+demo <- demo %>%
+  mutate(demog_raceother2 = gsub(
+    pattern = "Ashkenazic Jewish|a Jew.|ashkenazi Jew|Ashkenazi, Jew|Jewish canadian|Jewish Canadian|Eastern European Jewish|Jewish not Israeli|Ashkenazi, jewish",
+    replacement = "Jewish",
+    demog_raceother2
+  )) %>%
+  mutate(demog_raceother2 = ifelse(demog_raceother == "Jewish", "Jewish", "Other"))
+
+demog_race <- c(demo$demog_race___1,demo$demog_race___2,demo$demog_race___3,
+                demo$demog_race___4,demo$demog_race___5,demo$demog_race___6,
+                demo$demog_race___7,demo$demog_race___8,demo$demog_race___9,
+                demo$demog_race___10,demo$demog_raceother2)
+demo <- demo %>% 
+  mutate(combined_demog = coalesce(demog_race___1,demog_race___2,demog_race___3,
+                                   demog_race___4,demog_race___5,demog_race___5,
+                                   demog_race___6,demog_race___7,demog_race___8,
+                                   demog_race___9,demog_raceother2))
+
+demo$age <- floor(as.numeric((as.Date(demo$demog_date)-as.Date(demo$demog_dob))/365))
+
+demo_subset <- cbind(
+  demo$record_id,
+  demo$demog_sex,
+  demo$demog_gender,
+  demo$demog_education,
+  demo$demog_livealone,
+  demo$demog_birthplace,
+  demo$demog_bilingual,
+  demo$combined_demog,
+  demo$age
+)
+
+colnames(demo_subset) <- c(
+  "record_id", "Sex", "demog_gender", "Education",
+  "Live_Alone", "demog_birthplace", "Bilingual",
+  "Race", "age"
+)
+
+demo_subset <- as.data.frame(demo_subset)
+
+demo_subset <- demo_subset %>%
+  mutate(Age_Ranges = case_when(
+    as.numeric(age) >= 50 & as.numeric(age) <= 54 ~ "50-54",
+    as.numeric(age) >= 55 & as.numeric(age) <= 59 ~ "55-59",
+    as.numeric(age) >= 60 & as.numeric(age) <= 64 ~ "60-64",
+    as.numeric(age) >= 65 & as.numeric(age) <= 69 ~ "65-69",
+    as.numeric(age) >= 70 & as.numeric(age) <= 74 ~ "70-74",
+    as.numeric(age) >= 75 & as.numeric(age) <= 79 ~ "75-79",
+    as.numeric(age) >= 80 & as.numeric(age) <= 84 ~ "80-84",
+    as.numeric(age) >= 85 & as.numeric(age) <= 89 ~ "85-89",
+    as.numeric(age) >= 90 & as.numeric(age) <= 94 ~ "90-94",
+    as.numeric(age) >= 95 & as.numeric(age) <= 99 ~ "95-99",
+    TRUE ~ NA_character_  # handle any ages outside these ranges
+  ))
+
+demo_subset$Age <- as.numeric(demo_subset$age)
+
+##### CHAMPS - PA 
+champs_activities_questionnaire_for_older_adults <- read.csv("C:/Users/knandlall/Documents/champs_activities_questionnaire_for_older_adults.csv",
+                                                             na.strings = c("", " "))
+cat("Table of Missing Vals")
+table(is.na(champs_activities_questionnaire_for_older_adults$champs_date))
+
+champs <- champs_activities_questionnaire_for_older_adults
+table(is.na(champs$champs_dance_yn))
+champs <- champs[!is.na(champs$champs_date), ]
+champs <- champs[, -c(2:4)]
+champs[is.na(champs)] <- 0 
+
+### Florida Cogntive Activities Scale 
+florida_cognitive_activities_scale <- read.csv("C:/Users/knandlall/Documents/florida_cognitive_activities_scale.csv",na.strings = c("", " "))
+flor_cog <- florida_cognitive_activities_scale
+cat("Table of Missing Vals")
+table(is.na(florida_cognitive_activities_scale$fcas_date))
+flor_cog <- flor_cog[!is.na(flor_cog$fcas_date), ]
+flor_cog <- flor_cog[, -c(2:4)]
+
+source("C:/Users/knandlall/Documents/compute_cognition.R") ## not my code but allows for converting to numeric 
+higher_cog_scores <- compute_cognition(flor_cog)
+flor_cog_subset <- higher_cog_scores[,c(1,3)]
+
+median(flor_cog_subset$higher_cognition_score)
+mean(flor_cog_subset$higher_cognition_score)
+sd(flor_cog_subset$higher_cognition_score)
+
+### Loneliness 
+
+loneliness <- read.csv("C:/Users/knandlall/Documents/loneliness.csv",na.strings = c("", " "))
+lone <- loneliness
+cat("Table of Missing Vals")
+table(is.na(loneliness$loneliness_date))
+lone <- lone[!is.na(loneliness$loneliness_date), ]
+lone <- lone[, -c(2:4)]
+
+source("C:/Users/knandlall/Documents/recoded_loneliness.R")
+lone_recoded <- recoded_loneliness(lone[,-c(1,22)])
+lone$lone_sum <- rowSums(lone_recoded)
+
+lone_subset <- lone[,c(1,23)]
+
+median(lone_subset$lone_sum)
+mean(lone_subset$lone_sum)
+sd(lone_subset$lone_sum)
+
+ggplot(data = lone_subset,aes(x=lone_sum)) +
+  geom_histogram(binwidth = 1,fill="cadetblue3",color="black")+
+  geom_vline(
+    aes(xintercept = median(lone_sum), color = "Median"),
+    size = 1  # Adjust thickness
+  ) +
+  scale_color_manual(
+    name = "Legend",  # Title of the legend
+    values = c("Median" = "darkblue")  # Color for the median line
+  ) +
+  labs(
+    title = "Loneliness Score Sum",
+    x = "Loneliness Scores",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+ggplot(data = flor_cog_subset, aes(x = higher_cognition_score)) +
+  geom_histogram(binwidth = 1, fill = "aquamarine3", color = "black") + 
+  geom_vline(
+    aes(xintercept = median(higher_cognition_score), color = "Median"),
+    size = 1  # Adjust thickness
+  ) +
+  scale_color_manual(
+    name = "Legend",  # Title of the legend
+    values = c("Median" = "darkred")  # Color for the median line
+  ) +
+  labs(
+    title = "Florida Cognitive Activities Score",
+    x = "Score",
+    y = "Count"
+  ) + 
+  theme_minimal()
+
+### DAS (Depression/Anxiety/Stress)
+depression_anxiety_and_stress <- read.csv("C:/Users/knandlall/Documents/depression_anxiety_and_stress.csv",
+                                          na.strings = c("", " "))
+das <- depression_anxiety_and_stress
+cat("Table of Missing Vals")
+table(is.na(depression_anxiety_and_stress$dass_date))
+das <- das[!is.na(das$dass_date), ]
+das <- das[, -c(2:4)]
+
+source("C:/Users/knandlall/Documents/recoded_DAS.R")
+DAS_recoded <- recoded_DAS(das[,-1])
+das$das_sum <- rowSums(DAS_recoded)
+
+das_subset <- das[,c(1,25)]
+
+median(das_subset$das_sum)
+sd(das_subset$das_sum)
+
+ggplot(data = das_subset, aes(x=das_sum)) + 
+  geom_histogram(binwidth = 1, fill = "darkseagreen",color = "black") + 
+  geom_vline(
+    aes(xintercept = median(das_sum), color = "Median"),
+    size = 1.1  # Adjust thickness
+  ) +
+  scale_color_manual(
+    name = "Legend",  # Title of the legend
+    values = c("Median" = "black")  # Color for the median line
+  ) +
+  labs(
+    title = "Depression, Anxiety, Stress Scores",
+    x = "Depression, Anxiety, Stress Score Sum",
+    y = "Count"
+  ) + 
+  theme_minimal()
+
+### BEI 
+brain_health_food_guide <- read.csv("C:/Users/knandlall/Documents/brain_health_food_guide.csv",
+                                    na.strings = c("", " "))
+eat_patt <- brain_health_food_guide
+cat("Table of Missing Vals")
+table(is.na(brain_health_food_guide$epsa_date))
+eat_patt <- eat_patt[!is.na(eat_patt$epsa_date), ]
+eat_patt <- eat_patt[, -c(2:4)]
+
+source("C:/Users/knandlall/Documents/BEI_score.R")
+eat_patt$BEI_score <- apply(eat_patt[, -1], 1, BEI_score)
+
+eat_patt_subset <- eat_patt[,c(1,33)]
+
+median(eat_patt_subset$BEI_score)
+sd(eat_patt_subset$BEI_score)
+
+ggplot(data = eat_patt_subset, aes(x = BEI_score)) +
+  geom_histogram(xlim = 15, binwidth = 0.5, fill = "darkseagreen3", colour = "black")+
+  geom_vline(
+    aes(xintercept = median(BEI_score), color = "Median"),
+    size = 1.1  # Adjust thickness
+  ) +
+  scale_color_manual(
+    name = "Legend",  # Title of the legend
+    values = c("Median" = "black")  # Color for the median line
+  ) +
+  labs(
+    title = "Eating Pattern Self-Assessment",
+    x = "BEI Score",
+    y = "Count"
+  ) + 
+  theme_minimal()
+
+
+### Merging data for radar plots 
+merge_radar_data <- merge(get_act_subset,eat_patt_subset)
+merge_radar_data <- merge(merge_radar_data,flor_cog_subset)
+merge_radar_data <- merge(merge_radar_data,lone_subset)
+merge_radar_data <- merge(merge_radar_data,das_subset)
+colnames(merge_radar_data) <- c("record_id","PA","BEI_score","Flor_Cog",
+                                "Loneliness","DAS")
+row.names(merge_radar_data) <- merge_radar_data$record_id
+merge_radar_data <- merge_radar_data[,-1]
+
+write.csv(merge_radar_data,file = "C:/Users/knandlall/Documents/merge_radar_data.csv")
