@@ -1,0 +1,344 @@
+### function to extract silhouette width
+sil_width <- function(clusters, dis_matrix) {
+  mean(silhouette(clusters, dis_matrix)[, 3])  # Extract average silhouette width
+}
+
+
+################
+## 3 clusters 
+
+cluster_results3 <- data.frame(k_means = km_c3$cluster, 
+                              quantiled = polca_q_3$predclass,
+                              cat3 = polca3_3$predclass,
+                              cat4 = polca4_3$predclass,
+                              fuzzy = fuzzy_result_3$cluster)
+
+## k-means (includes interpretation) 
+#use euclidean distance bc k-means uses euclidean dist from standardized data 
+dis_matrix_kmeans.3 <- daisy(standardize_dat, metric = "euclidean")
+
+sil_kmeans.3 <- silhouette(cluster_results3$k_means, dis_matrix_kmeans.3)
+#it contains the silhouette widths for each observation in the dataset, as well as the cluster assignments
+
+plot(sil_kmeans.3, col = 1:max(cluster_results3$k_means), border = NA)
+#each horizontal bar is an observation and the length is silhouette width, ranges from -1 to 1 
+  #value of 1 = obs well clustered 
+  #value of 0 = obs is on border between 2 clusters 
+  #negative - indicate that it may be in the wrong cluster 
+abline(v = mean(sil_kmeans.3[, "sil_width"]), lty = 2, col = "red")
+## mean width 
+
+
+## Quartiled LCA  
+dis_matrix_quart.3 <- daisy(quartiled_data, metric = "gower")
+sil_quart.3 <- silhouette(cluster_results3$quantiled, dis_matrix_quart.3)
+
+plot(sil_quart.3, col = 1:max(cluster_results3$quantiled), border = NA)
+abline(v = mean(sil_quart.3[, "sil_width"]), lty = 2, col = "red")
+
+## 4-level LCA
+dis_matrix_cat4.3 <- daisy(cat_data, metric = "gower")
+sil_cat4.3 <- silhouette(cluster_results3$cat4, dis_matrix_cat4.3)
+plot(sil_cat4.3, col = 1:max(cluster_results3$cat4), border = NA)
+abline(v = mean(sil_cat4.3[, "sil_width"]), lty = 2, col = "red")
+
+## 3-level LCA
+dis_matrix_cat3.3 <- daisy(cat_data3, metric = "gower")
+sil_cat3.3 <- silhouette(cluster_results3$cat3, dis_matrix_cat3.3)
+plot(sil_cat3.3, col = 1:max(cluster_results3$cat3), border = NA)
+abline(v = mean(sil_cat3.3[, "sil_width"]), lty = 2, col = "red")
+
+## fuzzy 
+dis_matrix_fc.3 <- daisy(standardize_dat, metric = "euclidean")
+sil_fc.3 <- silhouette(cluster_results3$fuzzy, dis_matrix_fc.3)
+
+plot(sil_fc.3, col = 1:max(cluster_results3$fuzzy), border = NA)
+abline(v = mean(sil_fc.3[, "sil_width"]), lty = 2, col = "red")
+
+# Compute silhouette width for each method
+sil_kmeans_value <- sil_width(cluster_results3$k_means, dis_matrix_kmeans.3)
+sil_polca_quar_value <- sil_width(cluster_results3$quantiled, dis_matrix_quart.3)
+sil_polca_cat3_value <- sil_width(cluster_results3$cat3, dis_matrix_cat3.3)
+sil_polca_cat4_value <- sil_width(cluster_results3$cat4, dis_matrix_cat4.3)
+sil_fuzzy_value <- sil_width(cluster_results3$fuzzy, dis_matrix_fc.3)
+
+###############
+## 4 clusters 
+
+cluster_results4 <- data.frame(k_means = km_c4$cluster, 
+                              quantiled = polca_q_4$predclass,
+                              cat3 = polca3_4$predclass,
+                              cat4 = polca4_4$predclass,
+                              fuzzy = fuzzy_result_4$cluster)
+
+## kmeans
+dis_matrix_kmeans.4 <- daisy(standardize_dat, metric = "euclidean")
+sil_kmeans.4 <- silhouette(cluster_results4$k_means, dis_matrix_kmeans.4)
+
+plot(sil_kmeans.4, col = 1:max(cluster_results4$k_means), border = NA)
+abline(v = mean(sil_kmeans.4[, "sil_width"]), lty = 2, col = "red")
+
+## quartiled LCA 
+dis_matrix_quart.4 <- daisy(quartiled_data, metric = "gower")
+sil_quart.4 <- silhouette(cluster_results4$quantiled, dis_matrix_quart.4)
+
+plot(sil_quart.4, col = 1:max(cluster_results4$quantiled), border = NA)
+abline(v = mean(sil_quart.4[, "sil_width"]), lty = 2, col = "red")
+
+## 4-level LCA
+dis_matrix_cat4.4 <- daisy(cat_data, metric = "gower")
+sil_cat4.4 <- silhouette(cluster_results4$cat4, dis_matrix_cat4.4)
+
+plot(sil_cat4.4, col = 1:max(cluster_results4$cat4), border = NA)
+abline(v = mean(sil_cat4.4[, "sil_width"]), lty = 2, col = "red")
+
+## 3-level LCA
+dis_matrix_cat3.4 <- daisy(cat_data3, metric = "gower")
+sil_cat3.4 <- silhouette(cluster_results4$cat3, dis_matrix_cat3.4)
+
+plot(sil_cat3.4, col = 1:max(cluster_results4$cat3), border = NA)
+abline(v = mean(sil_cat3.4[, "sil_width"]), lty = 2, col = "red")
+
+## fuzzy 
+dis_matrix_fc.4 <- daisy(standardize_dat, metric = "euclidean")
+sil_fc.4 <- silhouette(cluster_results4$fuzzy, dis_matrix_fc.4)
+
+plot(sil_fc.4, col = 1:max(cluster_results4$fuzzy), border = NA)
+abline(v = mean(sil_fc.4[, "sil_width"]), lty = 2, col = "red")
+
+# Compute silhouette width for each method
+sil_kmeans_value <- sil_width(cluster_results4$k_means, dis_matrix_kmeans.4)
+sil_polca_quar_value <- sil_width(cluster_results4$quantiled, dis_matrix_quart.4)
+sil_polca_cat3_value <- sil_width(cluster_results4$cat3, dis_matrix_cat3.4)
+sil_polca_cat4_value <- sil_width(cluster_results4$cat4, dis_matrix_cat4.4)
+sil_fuzzy_value <- sil_width(cluster_results4$fuzzy, dis_matrix_fc.4)
+
+#################
+## 5 clusters 
+
+cluster_results5 <- data.frame(k_means = km_c5$cluster, 
+                              quantiled = polca_q_5$predclass,
+                              cat3 = polca3_5$predclass,
+                              cat4 = polca4_5$predclass, 
+                              fuzzy = fuzzy_result_5$cluster)
+
+## kmeans 
+dis_matrix_kmeans.5 <- daisy(standardize_dat, metric = "euclidean")
+sil_kmeans.5 <- silhouette(cluster_results5$k_means, dis_matrix_kmeans.5)
+
+plot(sil_kmeans.5, col = 1:max(cluster_results5$k_means), border = NA)
+abline(v = mean(sil_kmeans.5[, "sil_width"]), lty = 2, col = "red")
+
+## Quartiled LCA 
+dis_matrix_quart.5 <- daisy(quartiled_data, metric = "gower")
+sil_quart.5 <- silhouette(cluster_results5$quantiled, dis_matrix_quart.5)
+
+plot(sil_quart.5, col = 1:max(cluster_results5$quantiled), border = NA)
+abline(v = mean(sil_quart.5[, "sil_width"]), lty = 2, col = "red")
+
+## 4-level LCA
+dis_matrix_cat4.5 <- daisy(cat_data, metric = "gower")
+sil_cat4.5 <- silhouette(cluster_results5$cat4, dis_matrix_cat4.5)
+
+plot(sil_cat4.5, col = 1:max(cluster_results5$cat4), border = NA)
+abline(v = mean(sil_cat4.5[, "sil_width"]), lty = 2, col = "red")
+
+## 3-level LCA
+dis_matrix_cat3.5 <- daisy(cat_data3, metric = "gower")
+sil_cat3.5 <- silhouette(cluster_results5$cat3, dis_matrix_cat3.5)
+
+plot(sil_cat3.5, col = 1:max(cluster_results5$cat3), border = NA)
+abline(v = mean(sil_cat3.5[, "sil_width"]), lty = 2, col = "red")
+
+dis_matrix_fc.5 <- daisy(standardize_dat, metric = "euclidean")
+sil_fc.5 <- silhouette(cluster_results5$fuzzy, dis_matrix_fc.5)
+
+plot(sil_fc.5, col = 1:max(cluster_results5$fuzzy), border = NA)
+abline(v = mean(sil_fc.5[, "sil_width"]), lty = 2, col = "red")
+
+# Compute silhouette width for each method
+sil_kmeans_value <- sil_width(cluster_results5$k_means, dis_matrix_kmeans.5)
+sil_polca_quar_value <- sil_width(cluster_results5$quantiled, dis_matrix_quart.5)
+sil_polca_cat3_value <- sil_width(cluster_results5$cat3, dis_matrix_cat3.5)
+sil_polca_cat4_value <- sil_width(cluster_results5$cat4, dis_matrix_cat4.5)
+sil_fuzzy_value <- sil_width(cluster_results5$fuzzy, dis_matrix_fc.5)
+
+############################
+## extracting values for plots 
+###########################
+
+### cluster = 3
+
+sw.kmeans.3 <- sil_kmeans.3[,3]
+sw.neg.kmeans.3 <- sw.kmeans.3[sw.kmeans.3 < 0]
+sw.pos.kmeans.3 <- sw.kmeans.3[sw.kmeans.3 > 0]
+avgs.kmeans.3 <- summary(sil_kmeans.3)$clus.avg.widths
+
+sw.quart.3 <- sil_quart.3[,3]
+sw.neg.quart.3 <- sw.quart.3[sw.quart.3 < 0]
+sw.pos.quart.3 <- sw.quart.3[sw.quart.3 > 0]
+avgs.quart.3 <- summary(sil_quart.3)$clus.avg.widths
+
+sw.cat3.3 <- sil_cat3.3[,3]
+sw.neg.cat3.3 <- sw.cat3.3[sw.cat3.3 < 0]
+sw.pos.cat3.3 <- sw.cat3.3[sw.cat3.3 > 0]
+avgs.cat3.3 <- summary(sil_cat3.3)$clus.avg.widths
+
+sw.cat4.3 <- sil_cat4.3[,3]
+sw.neg.cat4.3 <- sw.cat4.3[sw.cat4.3 < 0]
+sw.pos.cat4.3 <- sw.cat4.3[sw.cat4.3 > 0]
+avgs.cat4.3 <- summary(sil_cat4.3)$clus.avg.widths
+
+sw.fc.3 <- sil_fc.3[,3]
+sw.neg.fc.3 <- sw.fc.3[sw.fc.3 < 0]
+sw.pos.fc.3 <- sw.fc.3[sw.fc.3 > 0]
+avgs.fc.3 <- summary(sil_fc.3)$clus.avg.widths
+
+### cluster = 4
+sw.kmeans.4 <- sil_kmeans.4[,3]
+sw.neg.kmeans.4 <- sw.kmeans.4[sw.kmeans.4 < 0]
+sw.pos.kmeans.4 <- sw.kmeans.4[sw.kmeans.4 > 0]
+avgs.kmeans.4 <- summary(sil_kmeans.4)$clus.avg.widths
+
+sw.quart.4 <- sil_quart.4[,3]
+sw.neg.quart.4 <- sw.quart.4[sw.quart.4 < 0]
+sw.pos.quart.4 <- sw.quart.4[sw.quart.4 > 0]
+avgs.quart.4 <- summary(sil_quart.4)$clus.avg.widths
+
+sw.cat3.4 <- sil_cat3.4[,3]
+sw.neg.cat3.4 <- sw.cat3.4[sw.cat3.4 < 0]
+sw.pos.cat3.4 <- sw.cat3.4[sw.cat3.4 > 0]
+avgs.cat3.4 <- summary(sil_cat3.4)$clus.avg.widths
+
+sw.cat4.4 <- sil_cat4.4[,3]
+sw.neg.cat4.4 <- sw.cat4.4[sw.cat4.4 < 0]
+sw.pos.cat4.4 <- sw.cat4.4[sw.cat4.4 > 0]
+avgs.cat4.4 <- summary(sil_cat4.4)$clus.avg.widths
+
+sw.fc.4 <- sil_fc.4[,3]
+sw.neg.fc.4 <- sw.fc.4[sw.fc.4 < 0]
+sw.pos.fc.4 <- sw.fc.4[sw.fc.4 > 0]
+avgs.fc.4 <- summary(sil_fc.4)$clus.avg.widths
+
+### cluster = 5
+sw.kmeans.5 <- sil_kmeans.5[,3]
+sw.neg.kmeans.5 <- sw.kmeans.5[sw.kmeans.5 < 0]
+sw.pos.kmeans.5 <- sw.kmeans.5[sw.kmeans.5 > 0]
+avgs.kmeans.5 <- summary(sil_kmeans.5)$clus.avg.widths
+
+sw.quart.5 <- sil_quart.5[,3]
+sw.neg.quart.5 <- sw.quart.5[sw.quart.5 < 0]
+sw.pos.quart.5 <- sw.quart.5[sw.quart.5 > 0]
+avgs.quart.5 <- summary(sil_quart.5)$clus.avg.widths
+
+sw.cat3.5 <- sil_cat3.5[,3]
+sw.neg.cat3.5 <- sw.cat3.5[sw.cat3.5 < 0]
+sw.pos.cat3.5 <- sw.cat3.5[sw.cat3.5 > 0]
+avgs.cat3.5 <- summary(sil_cat3.5)$clus.avg.widths
+
+sw.cat4.5 <- sil_cat4.5[,3]
+sw.neg.cat4.5 <- sw.cat4.5[sw.cat4.5 < 0]
+sw.pos.cat4.5 <- sw.cat4.5[sw.cat4.5 > 0]
+avgs.cat4.5 <- summary(sil_cat4.5)$clus.avg.widths
+
+sw.fc.5 <- sil_fc.5[,3]
+sw.neg.fc.5 <- sw.fc.5[sw.fc.5 < 0]
+sw.pos.fc.5 <- sw.fc.5[sw.fc.5 > 0]
+avgs.fc.5 <- summary(sil_fc.5)$clus.avg.widths
+
+## data frame for plotting 
+plot.df <- data.frame(type = c("kmeans","quartiled","cat3","cat4","fuzzy",
+                               "kmeans","quartiled","cat3","cat4", "fuzzy",
+                               "kmeans","quartiled","cat3","cat4","fuzzy"),
+                      cluster.num = c(3,3,3,3,3,4,4,4,4,4,5,5,5,5,5),
+                      neg = c(length(sw.neg.kmeans.3),length(sw.neg.quart.3),
+                        length(sw.neg.cat3.3), length(sw.neg.cat4.3), 
+                        length(sw.neg.fc.3),
+                      length(sw.neg.kmeans.4),length(sw.neg.quart.4),
+                        length(sw.neg.cat3.4), length(sw.neg.cat4.4),
+                      length(sw.neg.fc.4),
+                      length(sw.neg.kmeans.5),length(sw.neg.quart.5),
+                        length(sw.neg.cat3.5), length(sw.neg.cat4.5),
+                      length(sw.neg.fc.5)),
+                      avgs = c(mean(avgs.kmeans.3),mean(avgs.quart.3),
+                               mean(avgs.cat3.3),mean(avgs.cat4.3), 
+                               mean(avgs.fc.3),
+                               mean(avgs.kmeans.4),mean(avgs.quart.4),
+                               mean(avgs.cat3.4),mean(avgs.cat4.4),
+                               mean(avgs.fc.4),
+                               mean(avgs.kmeans.5),mean(avgs.quart.5),
+                               mean(avgs.cat3.5),mean(avgs.cat4.5),
+                               mean(avgs.fc.5))
+############################
+## plots
+###########################
+
+### visualizing the quality of clusters 
+plot(plot.df$neg,plot.df$avgs, pch = plot.df$cluster.num,col = as.factor(plot.df$type),
+     lwd = 2, xlab = "# of Negatives", ylab = "Average SW")
+
+for (type in levels(as.factor(plot.df$type))) {
+  subset_data <- plot.df[plot.df$type == type, ]
+  lines(subset_data$neg, subset_data$avgs, col = "darkgrey",lty = 1.5)
+}
+
+legend("topright", legend = levels(as.factor(plot.df$type)),
+       col = 1:length(levels(as.factor(plot.df$type))),
+       pch = 19)
+legend(x = 88.35,y = 0.2025, legend = unique(plot.df$cluster.num),
+       col = "black",
+       pch = unique(plot.df$cluster.num)
+      )
+
+### looking at distribution of scores 
+par(mfrow= c(2,3),mar = c(3, 2.5, 1, .5),tcl = NA,mgp = c(1.5, 0.5, 0))
+
+plot(density(sw.kmeans.3),col = 1, main = "K-Means Clustering",
+     xlab = "SI Width", xlim = c(-1,1),ylim = c(0,4))
+lines(density(sw.kmeans.4),col = 2)
+lines(density(sw.kmeans.5),col = 3)
+
+legend("topleft",
+       legend = c("3 Clusters","4 Clusters","5 Clusters"),
+       lwd = 1,
+       col = 1:3)
+
+plot(density(sw.quart.3),col = 1, main = "Quartiled poLCA",
+     xlab = "SI Width", xlim = c(-1,1),ylim = c(0,4))
+lines(density(sw.quart.4),col = 2)
+lines(density(sw.quart.5),col = 3)
+
+legend("topleft",
+       legend = c("3 Clusters","4 Clusters","5 Clusters"),
+       lwd = 1,
+       col = 1:3)
+
+plot(density(sw.cat3.3),col = 1, main = "3-Level poLCA",
+     xlab = "SI Width", xlim = c(-1,1),ylim = c(0,4))
+lines(density(sw.cat3.4),col = 2)
+lines(density(sw.cat3.5),col = 3)
+
+legend("topleft",
+       legend = c("3 Clusters","4 Clusters","5 Clusters"),
+       lwd = 1,
+       col = 1:3)
+
+plot(density(sw.cat4.3),col = 1, main = "4-Level poLCA",
+     xlab = "SI Width", xlim = c(-1,1),ylim = c(0,4))
+lines(density(sw.cat4.4),col = 2)
+lines(density(sw.cat4.5),col = 3)
+
+legend("topleft",
+       legend = c("3 Clusters","4 Clusters","5 Clusters"),
+       lwd = 1,
+       col = 1:3)
+
+plot(density(sw.fc.3),col = 1, main = "Fuzzy Clustering",
+     xlab = "SI Width", xlim = c(-1,1),ylim = c(0,4))
+lines(density(sw.fc.4),col = 2)
+lines(density(sw.fc.5),col = 3)
+
+legend("topleft",
+       legend = c("3 Clusters","4 Clusters","5 Clusters"),
+       lwd = 1,
+       col = 1:3)
