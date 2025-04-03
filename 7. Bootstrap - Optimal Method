@@ -68,10 +68,6 @@ summary.avgwidth <- data.frame("Cluster" = c(1,2,3,4),
                                "Lower CI" = ci_lower,
                                "Upper CI" = ci_upper)
 
-
-add in calculated CI research into issue with quantile
-
-
 library(kableExtra)
 
 summary.avgwidth %>%
